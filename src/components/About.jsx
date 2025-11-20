@@ -46,7 +46,6 @@ export default function About() {
       setCountdown(prev => (prev > 1 ? prev - 1 : 1));
     }, 1000);
 
-    // Save interval so we can clear it on mouseLeave
     startHover.interval = interval;
   };
 
@@ -87,16 +86,19 @@ export default function About() {
     return () => clearInterval(interval);
   }, [charIndex, lineIndex, currentLine, aboutActive]);
 
+
   return (
     <section
       id="about"
-      className="relative w-full max-w-2xl bg-[#111]/80 border border-green-900/20 rounded-xl p-8 mb-24 font-mono text-green-300 cursor-pointer overflow-hidden group"
+      className="relative w-full max-w-2xl bg-[#111]/80 border border-green-900/20 rounded-xl p-8 mb-24 
+                 font-mono text-gray-200 cursor-pointer overflow-hidden group"
       onMouseEnter={startHover}
       onMouseLeave={stopHover}
     >
       {/* BEFORE ACTIVATION – SHOW COUNTDOWN */}
       {!aboutActive && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 z-20 text-green-400 text-lg font-bold tracking-widest transition-opacity">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 z-20 
+                        text-gray-200 text-lg font-bold tracking-widest transition-opacity">
           {!timerStarted && <div>HOVER ME FOR PERSONAL DETAILS</div>}
 
           {timerStarted && (
@@ -109,15 +111,20 @@ export default function About() {
       )}
 
       {/* ACTUAL CONTENT */}
-      <div className={`transition duration-500 ${!aboutActive ? "blur-md opacity-40" : "blur-0 opacity-100"}`}>
+      <div
+        className={`transition duration-500 
+          ${!aboutActive ? "blur-md opacity-40" : "blur-0 opacity-100"}`}
+      >
         <h2 className="text-green-400 text-2xl font-mono mb-5">{"$ about"}</h2>
 
-        {typedLines.map((line, i) => <div key={i}>{line}</div>)}
+        {typedLines.map((line, i) => (
+          <div key={i} className="text-gray-200">{line}</div>
+        ))}
 
         {lineIndex < aboutLines.length && (
-          <div>
+          <div className="text-gray-200">
             {currentLine}
-            <span className="animate-pulse">_</span>
+            <span className="animate-pulse text-gray-400">_</span>
           </div>
         )}
 
@@ -134,13 +141,16 @@ export default function About() {
                   else setAbortMsg("ABORTING LAUNCH SEQUENCE...");
                 }
               }}
-              className="bg-transparent border-none outline-none w-32 caret-green-400"
+              className="bg-transparent border-none outline-none w-32 
+                         text-gray-100 caret-white"
               autoFocus
             />
           </div>
         )}
 
-        {abortMsg && <p className="text-red-400 mt-3 tracking-widest">{abortMsg}</p>}
+        {abortMsg && (
+          <p className="text-red-400 mt-3 tracking-widest">{abortMsg}</p>
+        )}
 
         {showVideo && (
           <div className="mt-6 border border-green-700 rounded-md overflow-hidden">

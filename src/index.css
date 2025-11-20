@@ -6,7 +6,7 @@
   display: inline-block;
   white-space: nowrap;
   overflow: hidden;
-  border-right: .15em solid #00ff00;
+  border-right: .15em solid #f4f8f4;
   animation: typing 6s steps(30, end) forwards;
 }
 

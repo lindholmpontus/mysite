@@ -30,7 +30,7 @@ export default function Portfolio() {
         {/* HERO */}
         <header className="pt-20 pb-16">
           <h1
-            className={`text-green-400 text-4xl md:text-6xl font-mono typing-effect overflow-hidden leading-[1.2] py-1 ${heroDone ? "no-cursor" : ""}`}
+            className={`text-white-400 text-4xl md:text-6xl font-mono typing-effect overflow-hidden leading-[1.2] py-1 ${heroDone ? "no-cursor" : ""}`}
             onAnimationEnd={() => setHeroDone(true)}
           >
             Hej! Jag heter Pontus Lindholm
@@ -39,9 +39,9 @@ export default function Portfolio() {
         </header>
 
         {/* INTRO */}
-        <section className="w-full max-w-2xl bg-black/40 border border-green-500/20 backdrop-blur-sm rounded-xl p-8 mb-16 text-left shadow-lg shadow-green-500/10 hover:shadow-green-500/20 transition-all duration-300 hover:-translate-y-1">
-          <h2 className="text-xl md:text-2xl font-mono text-green-400 tracking-wide mb-3 flex items-center gap-2">
-            <span className="text-green-500">&#62;_</span> Vem är jag?
+        <section className="w-full max-w-2xl bg-black/40 border border-white-500/20 backdrop-blur-sm rounded-xl p-8 mb-16 text-left shadow-lg shadow-green-500/10 hover:shadow-green-500/20 transition-all duration-300 hover:-translate-y-1">
+          <h2 className="text-xl md:text-2xl font-mono text-white-400 tracking-wide mb-3 flex items-center gap-2">
+            <span className="text-white-500">&#62;_</span> Vem är jag?
           </h2>
 
           <div className="h-[1px] w-full bg-gradient-to-r from-green-500/40 to-transparent mb-5"></div>
@@ -60,7 +60,7 @@ export default function Portfolio() {
           <a
             href="/Pontus_Lindholm_CV.pdf"
             download="Pontus_Lindholm_CV.pdf"
-            className="inline-block border border-green-500 rounded-lg px-6 py-2 mt-6 font-mono text-green-300 transition duration-200 hover:bg-green-500 hover:text-black shadow-inner hover:shadow-green-500/30"
+            className="inline-block border border-white-500 rounded-lg px-6 py-2 mt-6 font-mono text-white-300 transition duration-200 hover:bg-green-500 hover:text-black shadow-inner hover:shadow-green-500/30"
           >
             {">"} Ladda ner CV
           </a>
@@ -78,7 +78,7 @@ export default function Portfolio() {
             <span className="text-green-500">&#62;_</span> the lab
           </h2>
 
-          <p className="text-sm text-green-200/70 font-mono mb-5">
+          <p className="text-sm text-white-200/70 font-mono mb-5">
             Här släpper jag lös grejer som kanske (inte) behövs.
           </p>
 
