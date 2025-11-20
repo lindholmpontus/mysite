@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Portfolio from "./Portfolio";
 import Game from "./components/Game";
 import Hypnotized from "./components/Hypnotized";
-import Unemployedment from "./components/unemployedment";
+import Unemployedment from "./components/Unemployedment";
 import Hobbies from "./components/Hobbies"
 import GameAchievements from "./components/GameAchievements";
 import OsrsStats from "./components/OsrsStats";
