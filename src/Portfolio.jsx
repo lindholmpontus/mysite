@@ -53,11 +53,12 @@ export default function Portfolio() {
           </p>
 
           <p className="text-gray-300 leading-relaxed font-light mt-4">
-            Jag gillar processen därkod inte bara fungerar, utan <span className="text-green-400">känns bra</span>.
+            Jag söker en arbetsplats där jag kan fortsätta utvecklas, lära mig mer av erfarna kollegor
+            och samtidigt bidra med nyfikenhet och ambition.
           </p>
 
           <a
-            href="/cv.pdf"
+            href="/Pontus_Lindholm_CV.pdf"
             download="Pontus_Lindholm_CV.pdf"
             className="inline-block border border-green-500 rounded-lg px-6 py-2 mt-6 font-mono text-green-300 transition duration-200 hover:bg-green-500 hover:text-black shadow-inner hover:shadow-green-500/30"
           >
