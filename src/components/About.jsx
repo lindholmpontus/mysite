@@ -2,10 +2,15 @@ import React, { useState, useEffect } from "react";
 
 export default function About() {
   const [aboutActive, setAboutActive] = useState(false);
+  const [hoverTime, setHoverTime] = useState(0);
+  const [countdown, setCountdown] = useState(3);
+  const [timerStarted, setTimerStarted] = useState(false);
+
   const [typedLines, setTypedLines] = useState([]);
   const [currentLine, setCurrentLine] = useState("");
   const [lineIndex, setLineIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
+
   const [terminalInput, setTerminalInput] = useState("");
   const [showVideo, setShowVideo] = useState(false);
   const [abortMsg, setAbortMsg] = useState("");
@@ -18,6 +23,43 @@ export default function About() {
     "DO YOU WANT TO LOAD TARGET_PRESENTATION? (y/n?)"
   ];
 
+  /* -----------------------------
+      HOVER TIMER (3 SECONDS)
+  ------------------------------*/
+  const startHover = () => {
+    if (aboutActive) return;
+
+    setTimerStarted(true);
+    setHoverTime(0);
+    setCountdown(3);
+
+    const interval = setInterval(() => {
+      setHoverTime(prev => {
+        if (prev >= 3) {
+          clearInterval(interval);
+          setAboutActive(true);
+          setTimerStarted(false);
+        }
+        return prev + 1;
+      });
+
+      setCountdown(prev => (prev > 1 ? prev - 1 : 1));
+    }, 1000);
+
+    // Save interval so we can clear it on mouseLeave
+    startHover.interval = interval;
+  };
+
+  const stopHover = () => {
+    setTimerStarted(false);
+    setHoverTime(0);
+    setCountdown(3);
+    clearInterval(startHover.interval);
+  };
+
+  /* -----------------------------
+      TYPEWRITER EFFECT
+  ------------------------------*/
   useEffect(() => {
     if (!aboutActive) return;
     if (lineIndex >= aboutLines.length) return;
@@ -49,14 +91,24 @@ export default function About() {
     <section
       id="about"
       className="relative w-full max-w-2xl bg-[#111]/80 border border-green-900/20 rounded-xl p-8 mb-24 font-mono text-green-300 cursor-pointer overflow-hidden group"
-      onMouseEnter={() => setAboutActive(true)}
+      onMouseEnter={startHover}
+      onMouseLeave={stopHover}
     >
+      {/* BEFORE ACTIVATION – SHOW COUNTDOWN */}
       {!aboutActive && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/40 z-20 text-green-400 text-lg font-bold tracking-widest group-hover:opacity-0 transition-opacity duration-300">
-          HOVER ME FOR PERSONAL DETAILS
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 z-20 text-green-400 text-lg font-bold tracking-widest transition-opacity">
+          {!timerStarted && <div>HOVER ME FOR PERSONAL DETAILS</div>}
+
+          {timerStarted && (
+            <div className="flex flex-col items-center gap-2">
+              <div className="text-2xl animate-pulse">Loading…</div>
+              <div className="text-4xl font-bold">{countdown}</div>
+            </div>
+          )}
         </div>
       )}
 
+      {/* ACTUAL CONTENT */}
       <div className={`transition duration-500 ${!aboutActive ? "blur-md opacity-40" : "blur-0 opacity-100"}`}>
         <h2 className="text-green-400 text-2xl font-mono mb-5">{"$ about"}</h2>
 
