@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.typing-effect {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: .15em solid #00ff00;
+  animation: typing 6s steps(30, end) forwards;
+}
+
+
+/* Simulerar typing */
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+/* Blinkande cursor */
+.cursor {
+  animation: blinkCursor 0.7s infinite;
+}
+
+@keyframes blinkCursor {
+  0%, 50% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+/* Removes border once typing is done */
+.no-cursor {
+  border-right: none !important;
+}
+
+
+.typing-block {
+  display: inline-block;
+  overflow: hidden;
+  border-right: 2px solid #00ff00;
+  animation: typing 4s steps(60, end) forwards, blink .7s step-end infinite;
+  white-space: pre-line;
+  width: 0;
+}
+.typing-block.finished {
+  border-right: none;
+}
+
+
+
+
+
+
+
