@@ -1,116 +1,246 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import pcImage from "../assets/computer-screen.svg";
 
-import backgroundImg from "../assets/blackgreen.jpeg";
-import gamingImg from "../assets/gaming.jpg";
 import guitarImg from "../assets/guitar.png";
+import gamingImg from "../assets/gaming.jpg";
 import gymImg from "../assets/gym.jpg";
 
-export default function Hobbies() {
-    const navigate = useNavigate();
+export default function ComputerLogin() {
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [autoTypingDone, setAutoTypingDone] = useState(false);
+    const [playBounce, setPlayBounce] = useState(false);
+    const [showDesktop, setShowDesktop] = useState(false);
 
-    const [terminalLines, setTerminalLines] = useState([]);
-    const [reveals, setReveals] = useState([]);
+    const [autoOpenFolder, setAutoOpenFolder] = useState(false);
+    const [startSlideshow, setStartSlideshow] = useState(false);
+    const [currentIndex, setCurrentIndex] = useState(0);
 
-    const introCommands = [
-        "Connecting to Pontus mainframe...",
-        "Decrypting identity modules...",
-        "Breaching hobby firewall...",
-        "Decoding encrypted interests...",
-        "",
-        ">> HOBBY LOG FOUND"
+    const hobbies = [
+        { img: guitarImg, text: "Spela gitarr" },
+        { img: gamingImg, text: "Gamea" },
+        { img: gymImg, text: "Gymma" }
     ];
 
-    const hobbySequence = [
-        { text: 'Intressen inkluderar: "Spela gitarr"', img: guitarImg },
-        { text: 'Intressen inkluderar: "Gamea"', img: gamingImg },
-        { text: 'Intressen inkluderar: "Gymma"', img: gymImg }
-    ];
-
-    // INTRO TERMINAL SEQUENCE
+    // ---- AUTO TYPE EFFECT ----
     useEffect(() => {
-        let i = 0;
-        const introInterval = setInterval(() => {
-            if (i < introCommands.length) {
-                setTerminalLines(prev => [...prev, introCommands[i]]);
-                i++;
-            } else {
-                clearInterval(introInterval);
-                startHobbyReveal();
-            }
-        }, 900);
+        let timer;
 
-        return () => clearInterval(introInterval);
+        const typeUsername = async () => {
+            const text = "pontus-lindholm-pc";
+            for (let i = 0; i < text.length; i++) {
+                await new Promise((res) => {
+                    timer = setTimeout(() => {
+                        setUsername((prev) => prev + text[i]);
+                        res();
+                    }, 120);
+                });
+            }
+        };
+
+        const typePassword = async () => {
+            const text = "12345555555555555555555";
+            for (let i = 0; i < text.length; i++) {
+                await new Promise((res) => {
+                    timer = setTimeout(() => {
+                        setPassword((prev) => prev + text[i]);
+                        res();
+                    }, 90);
+                });
+            }
+        };
+
+        const run = async () => {
+            await typeUsername();
+            await new Promise((res) => setTimeout(res, 250));
+            await typePassword();
+            setAutoTypingDone(true);
+
+            setTimeout(() => {
+                setPlayBounce(true);
+            }, 300);
+        };
+
+        run();
+        return () => clearTimeout(timer);
     }, []);
 
-    // HOBBY REVEAL SEQUENCE
-    function startHobbyReveal() {
+    // ---- SHOW DESKTOP ----
+    useEffect(() => {
+        if (playBounce) {
+            const t = setTimeout(() => {
+                setShowDesktop(true);
+
+                // --- WAIT BEFORE ICON BOUNCE ---
+                setTimeout(() => {
+                    setAutoOpenFolder(true);
+                }, 1200); // 1.2s desktop time
+
+            }, 500);
+
+            return () => clearTimeout(t);
+        }
+    }, [playBounce]);
+
+    // ---- AFTER ICON BOUNCE, START SLIDESHOW ----
+    useEffect(() => {
+        if (!autoOpenFolder) return;
+
+        const openDelay = setTimeout(() => {
+            setStartSlideshow(true);
+        }, 1000); // 1 second after bounce
+
+        return () => clearTimeout(openDelay);
+    }, [autoOpenFolder]);
+
+    // ---- SLIDESHOW ----
+    useEffect(() => {
+        if (!startSlideshow) return;
+
         let index = 0;
-
-        const revealInterval = setInterval(() => {
-            const item = hobbySequence[index];
-            setTerminalLines(prev => [...prev, "", ">> " + item.text]);
-            setReveals(prev => [...prev, item.img]);
+        const interval = setInterval(() => {
             index++;
+            if (index >= hobbies.length) {
+                clearInterval(interval);
+            } else {
+                setCurrentIndex(index);
+            }
+        }, 1800);
 
-            if (index >= hobbySequence.length) clearInterval(revealInterval);
-        }, 1600);
-    }
+        return () => clearInterval(interval);
+    }, [startSlideshow]);
+
 
     return (
-        <div className="min-h-screen w-full bg-black text-green-400 font-mono flex flex-col items-center pt-20 px-4 relative">
-                  <img
-                    src={backgroundImg}
-                    alt="background"
-                    className="absolute inset-0 w-full h-full object-cover blur-xl opacity-10"
-                  />
+        <div
+            className="h-screen w-screen flex items-center justify-center relative"
+            style={{
+                background: "linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%)"
+            }}
+        >
 
-            {/* EXIT BUTTON */}
-            <button
-                onClick={() => navigate(-1)}
-                className="absolute top-4 left-4 z-50 border border-green-500 text-green-300 px-4 py-1 rounded hover:bg-green-500 hover:text-black transition"
-            >
-                {">"} Exit
-            </button>
 
-            {/* TERMINAL BOX */}
-            <div className="bg-[#0c0c0c] border border-green-700 rounded-lg p-6 w-full max-w-2xl shadow-[0_0_25px_#00ff95] text-left">
-                {terminalLines.map((line, i) => (
-                    <div key={i} className="typing-line">{line}</div>
-                ))}
-                <span className="animate-pulse">█</span>
+            <div className="relative">
+                <img
+                    src={pcImage}
+                    alt="pixel pc"
+                    className="w-[550px] mx-auto select-none"
+                    draggable="false"
+                />
+
+                {/* LOGIN OVERLAY */}
+                <div
+                    className="absolute overflow-hidden"
+                    style={{
+                        top: "17.2%",
+                        left: "20.3%",
+                        width: "59.4%",
+                        height: "40.6%",
+                        background: "#050608",
+                        border: "1px solid #222",
+                        fontFamily: "monospace",
+                        padding: "12px",
+                        transition: "opacity 0.4s ease",
+                        opacity: showDesktop ? 0 : 1,
+                        pointerEvents: showDesktop ? "none" : "auto"
+                    }}
+                >
+                    <div className="flex flex-col justify-center items-center text-white h-full">
+                        <h2 className="text-center text-lg mb-4">LOGIN REQUIRED</h2>
+
+                        <input
+                            type="text"
+                            placeholder="username"
+                            className="bg-[#111] border border-gray-600 text-white px-2 py-1 mb-2 w-full outline-none text-sm"
+                            value={username}
+                            readOnly
+                        />
+
+                        <input
+                            type="password"
+                            placeholder="password"
+                            className="bg-[#111] border border-gray-600 text-white px-2 py-1 mb-3 w-full outline-none text-sm"
+                            value={password}
+                            readOnly
+                        />
+
+                        <button
+                            className={`bg-white text-black font-bold py-1 w-full text-sm transition 
+                                ${playBounce ? "one-bounce" : autoTypingDone ? "" : "opacity-50"}`}
+                        >
+                            ENTER
+                        </button>
+                    </div>
+                </div>
+
+                {/* DESKTOP + SLIDESHOW */}
+                <div
+                    className="absolute flex flex-col p-3 text-white"
+                    style={{
+                        top: "17.2%",
+                        left: "20.3%",
+                        width: "59.4%",
+                        height: "40.6%",
+                        background: "#1e4aa3",
+                        opacity: showDesktop ? 1 : 0,
+                        transition: "opacity 0.4s ease",
+                        overflow: "hidden"
+                    }}
+                >
+                    {/* DESKTOP ICON */}
+                    {!startSlideshow && (
+                        <div
+                            className={`flex flex-col items-center w-16 gap-1 
+                                transition ${autoOpenFolder ? "icon-bounce" : ""}`}
+                        >
+                            <div className="text-3xl">🗂️</div>
+                            <p className="text-xs text-center leading-tight">Mina_<br />Intressen</p>
+                        </div>
+                    )}
+
+                    {/* SLIDESHOW */}
+                    {startSlideshow && (
+                        <div className="relative w-full h-full">
+                            <img
+                                src={hobbies[currentIndex].img}
+                                alt="hobby"
+                                className="absolute inset-0 w-full h-full object-cover animate-fadeZoom"
+                            />
+                            <div className="absolute bottom-4 left-0 w-full text-center text-lg font-bold animate-textFade">
+                                {hobbies[currentIndex].text}
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
-            {/* IMAGE REVEAL */}
-            <div className="mt-10 flex flex-row flex-wrap gap-6 justify-center">
-                {reveals.map((img, i) => (
-                    <img
-                        key={i}
-                        src={img}
-                        alt="hobby"
-                        className="w-72 rounded-lg border border-green-700 shadow-[0_0_15px_#00ff95] opacity-0 animate-fadeIn"
-                    />
-                ))}
-            </div>
-
-
-            {/* CSS ANIMATIONS */}
             <style>{`
-        .typing-line {
-          animation: typeIn 0.25s ease;
-        }
-        @keyframes typeIn {
-          from { opacity: 0; transform: translateX(-5px); }
-          to { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: scale(0.8); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.5s ease forwards;
-        }
-      `}</style>
+                @keyframes oneBounce {
+                  0% { transform: scale(1); }
+                  40% { transform: scale(0.92); }
+                  100% { transform: scale(1); }
+                }
+                .one-bounce { animation: oneBounce 0.45s ease forwards; }
+
+                @keyframes iconBounce {
+                  0% { transform: scale(1); }
+                  35% { transform: scale(1.15); }
+                  100% { transform: scale(1); }
+                }
+                .icon-bounce { animation: iconBounce 0.4s ease forwards; }
+
+                @keyframes fadeZoom {
+                  0% { opacity: 0; transform: scale(1.12); }
+                  100% { opacity: 1; transform: scale(1); }
+                }
+                .animate-fadeZoom { animation: fadeZoom 0.9s ease forwards; }
+
+                @keyframes textFade {
+                  0% { opacity: 0; }
+                  100% { opacity: 1; }
+                }
+                .animate-textFade { animation: textFade 0.8s ease forwards; }
+            `}</style>
         </div>
     );
 }

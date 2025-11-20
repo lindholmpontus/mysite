@@ -1,0 +1,18 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Ingen bakgrund = transparent -->
+  <!-- Yttre ram (beige CRT) -->
+  <rect x="76" y="64" width="360" height="270" rx="30" ry="30" fill="#d9cfb9"></rect>
+
+  <!-- Innerre ram (lite mörkare kant runt skärmen) -->
+  <rect x="102" y="90" width="308" height="218" rx="18" ry="18" fill="#c7bca3"></rect>
+
+  <!-- Själva skärmen (svart) -->
+  <rect x="118" y="106" width="276" height="186" rx="6" ry="6" fill="#050505"></rect>
+
+  <!-- Liten power-indikator -->
+  <circle cx="118" cy="320" r="5" fill="#2ecc71"></circle>
+
+  <!-- Fot / stand -->
+  <rect x="206" y="334" width="100" height="32" rx="6" ry="6" fill="#c7bca3"></rect>
+  <rect x="172" y="366" width="168" height="26" rx="10" ry="10" fill="#d9cfb9"></rect>
+</svg>
