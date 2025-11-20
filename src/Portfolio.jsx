@@ -87,53 +87,40 @@ export default function Portfolio() {
             {/* GAME */}
             <div
               onClick={() => navigate("/gaming")}
-              className="cursor-pointer border border-green-700 bg-black/40 rounded-lg p-4 font-mono text-green-300 hover:bg-green-600 hover:text-black transition hover:scale-[1.03] text-center"
+              className="cursor-pointer border border-green-500 bg-black/40 rounded-lg p-4 font-mono text-green-300 hover:bg-green-500 hover:text-black transition hover:-translate-y-1 hover:rotate-1 text-center"
             >
-              {">"} Gaming Achivements
+              {">"} Gaming Achievements
             </div>
 
             {/* HYPNOTIZE */}
             <div
               onClick={() => navigate("/hypnotize")}
-              className="cursor-pointer border border-green-700 bg-black/40 rounded-lg p-4 font-mono text-green-300 hover:bg-green-600 hover:text-black transition hover:scale-[1.03] text-center"
+              className="cursor-pointer border border-purple-500 bg-black/40 rounded-lg p-4 font-mono text-purple-300 hover:bg-purple-500 hover:text-black transition hover:-translate-y-1 hover:-rotate-1 text-center"
             >
               {">"} Bli hypnotiserad
             </div>
 
-            {/* UNEMPLOYED BUTTON (example) */}
+            {/* UNEMPLOYED */}
             <div
               onClick={() => navigate("/unemployedment")}
-              className="cursor-pointer border border-yellow-600/40 bg-black/30 rounded-lg p-4 font-mono text-yellow-300 hover:bg-yellow-400 hover:text-black transition hover:scale-[1.03] text-center"
+              className="cursor-pointer border border-yellow-500 bg-black/20 rounded-lg p-4 font-mono text-yellow-300 hover:bg-yellow-400 hover:text-black transition hover:scale-110 text-center"
             >
               {">"} Ladda arbetslöshet
             </div>
 
-            {/* HOBBIES BUTTON (example) */}
+            {/* HOBBIES */}
             <div
               onClick={() => navigate("/hobbies")}
-              className="cursor-pointer border border-blue-600/40 bg-black/30 rounded-lg p-4 font-mono text-green-300 hover:bg-yellow-400 hover:text-black transition hover:scale-[1.03] text-center"
+              className="cursor-pointer border border-blue-500 bg-black/30 rounded-lg p-4 font-mono text-blue-300 hover:bg-blue-500 hover:text-black transition hover:scale-105 hover:brightness-150 text-center"
             >
               {">"} Ta reda på mina intressen
             </div>
 
-            <div
-              onMouseEnter={() => {
-                const random = Math.floor(Math.random() * 1600) - 80; // -80 till +80 px
-                setOffset(random);
-              }}
-              style={{
-                transform: `translateX(${offset}px)`,
-                transition: "transform 0.15s ease"
-              }}
-              className="cursor-pointer border border-blue-600/40 bg-black/30 rounded-lg p-4 font-mono text-green-300 text-center"
-            >
-              {">"} Mina svagheter
-            </div>
-
-            {/* FUTURE FEATURE SLOT */}
-            <div className="border border-gray-700 bg-black/20 rounded-lg p-4 font-mono text-gray-400 text-center opacity-50">
+            {/* FUTURE FEATURE */}
+            <div className="border border-gray-600 bg-black/20 rounded-lg p-4 font-mono text-gray-400 text-center opacity-50">
               {">"} More coming soon...
             </div>
+
 
           </div>
         </section>
