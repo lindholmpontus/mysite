@@ -51,7 +51,7 @@ export default function Projects() {
       title: "This game will get you drunk",
       desc: "Ett festspel utvecklat för vändor till krogen.",
       tags: ["React", "JavaScript", "TailWind", "FireBase"],
-      link: "https://github.com/lindholmpontus",
+      link: "https://github.com/lindholmpontus/crazygame",
     },
 
 

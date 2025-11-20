@@ -10,7 +10,7 @@ export default function Portfolio() {
   const [heroDone, setHeroDone] = useState(false);
   const [showGame, setShowGame] = useState(false);
   const navigate = useNavigate();
-  const [offset, setOffset] = React.useState(0);
+  const [offset, setOffset] = React.useState({ x: 0, y: 0 });
 
   return (
 
@@ -115,6 +115,22 @@ export default function Portfolio() {
             >
               {">"} Ta reda på mina intressen
             </div>
+
+            {/* UNCLICKABLE WEAKNESS BUTTON */}
+            <div
+              onMouseEnter={() => {
+                const randomX = (Math.random() - 0.5) * 500; // flyttar mycket
+                const randomY = (Math.random() - 0.5) * 500;
+                setOffset({ x: randomX, y: randomY });
+              }}
+              style={{
+                transform: `translate(${offset.x}px, ${offset.y}px)`
+              }}
+              className="relative cursor-pointer border border-red-500 bg-black/30 rounded-lg p-4 font-mono text-red-300 transition-all duration-150 select-none text-center"
+            >
+              {">"} Mina svagheter
+            </div>
+
 
             {/* FUTURE FEATURE */}
             <div className="border border-gray-600 bg-black/20 rounded-lg p-4 font-mono text-gray-400 text-center opacity-50">
