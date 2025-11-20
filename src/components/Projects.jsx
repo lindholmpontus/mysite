@@ -43,7 +43,7 @@ export default function Projects() {
     },
         {
       title: "SpaceParty",
-      desc: "Online Android multiplayer game.",
+      desc: "Online Android multiplayer spel.",
       tags: ["Skolprojekt", "Kotlin", "FireBase", "Android Studio"],
       link: "https://github.com/JohnNorrbom/Klientutvecklingsprojekt",
     },
