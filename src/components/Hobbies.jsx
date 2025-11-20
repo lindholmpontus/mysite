@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from "react";
 import pcImage from "../assets/computer-screen.svg";
+import { useNavigate } from "react-router-dom";
 
 import guitarImg from "../assets/guitar.png";
 import gamingImg from "../assets/gaming.jpg";
 import gymImg from "../assets/gym.jpg";
 
-export default function ComputerLogin() {
+export default function Hobbies() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [autoTypingDone, setAutoTypingDone] = useState(false);
     const [playBounce, setPlayBounce] = useState(false);
     const [showDesktop, setShowDesktop] = useState(false);
+    const navigate = useNavigate();
+
 
     const [autoOpenFolder, setAutoOpenFolder] = useState(false);
     const [startSlideshow, setStartSlideshow] = useState(false);
@@ -118,7 +121,13 @@ export default function ComputerLogin() {
                 background: "linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%)"
             }}
         >
-
+            {/* Exit-button */}
+            <button
+                onClick={() => navigate(-1)}
+                className="absolute top-4 left-4 border border-white text-white px-4 py-1 rounded font-mono hover:bg-white hover:text-black transition"
+            >
+                {">"} Exit
+            </button>
 
             <div className="relative">
                 <img
