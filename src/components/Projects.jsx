@@ -30,7 +30,7 @@ export default function Projects() {
   };
 
   const projects = [
-        {
+    {
       title: "Projektarbete - Maximalfönster",
       desc: "En intern app för företagets säljare som ersätter manuell fönstermätning. Den låter dem registrera mått digitalt på plats, säkerställer korrekta värden och visar en visuell monteringsskiss i realtid.",
       tags: ["JavaScript", "php",],
@@ -41,7 +41,7 @@ export default function Projects() {
       tags: ["Java", "GraalVM", "Spring Boot"],
       link: "https://hig.diva-portal.org/smash/get/diva2:1973227/FULLTEXT01.pdf",
     },
-        {
+    {
       title: "SpaceParty",
       desc: "Online Android multiplayer spel.",
       tags: ["Skolprojekt", "Kotlin", "FireBase", "Android Studio"],
@@ -65,13 +65,18 @@ export default function Projects() {
         {projects.map((p, i) => (
           <div
             key={i}
-            className="border border-green-900/40 bg-black/40 rounded-lg p-5 text-left transition duration-300 hover:scale-[1.03] hover:shadow-lg hover:shadow-green-500/30"
+            className="border border-white/10 bg-black/40 rounded-lg p-5 text-left 
+                 transition duration-300 hover:scale-[1.03] hover:shadow-xl hover:shadow-white/10"
           >
-            <h3 className="text-green-400 font-mono text-xl mb-2">{p.title}</h3>
-            <p className="text-green-200 text-sm mb-3 leading-5 font-mono opacity-90">
+            {/* TITLE – vit istället för grön */}
+            <h3 className="text-white font-mono text-xl mb-2">{p.title}</h3>
+
+            {/* DESC – ljusgrå och mer lättläst */}
+            <p className="text-gray-300 text-sm mb-3 leading-5 font-mono opacity-90">
               {p.desc}
             </p>
 
+            {/* TAGS – dina färger används här, blir riktigt snygg mix */}
             <div className="flex flex-wrap gap-2 mb-4">
               {p.tags.map((tag, idx) => (
                 <span
@@ -83,16 +88,19 @@ export default function Projects() {
               ))}
             </div>
 
+            {/* BUTTON – lite elegantare blåvit tema */}
             <a
               href={p.link}
               target="_blank"
-              className="inline-block border border-green-500 text-green-400 font-mono px-3 py-1 rounded hover:bg-green-500 hover:text-black transition text-xs"
+              className="inline-block border border-blue-400 text-blue-300 font-mono px-3 py-1 rounded 
+                   hover:bg-blue-400 hover:text-black transition text-xs"
             >
               {">"} View Project
             </a>
           </div>
         ))}
       </div>
+
     </section>
   );
 }

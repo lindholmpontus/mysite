@@ -30,21 +30,22 @@ export default function Skills() {
         {skills.map((skill) => (
           <div
             key={skill.name}
-            className="group flex flex-col items-center transition-transform duration-300 hover:scale-110"
+            className="group flex flex-col items-center transition-transform duration-300 hover:scale-110 "
           >
-            <div className="p-2 rounded-lg transition-all duration-300 group-hover:shadow-lg group-hover:shadow-green-500/40">
+            <div className="p-2 rounded-lg transition-all duration-300">
               <img
                 src={skill.logo}
-                className="w-12 drop-shadow-sm group-hover:drop-shadow-[0_0_10px_#22c55e]"
+                className="w-12 transition-all duration-300 group-hover:drop-shadow-[0_0_6px_rgba(255,255,255,0.4)]"
                 alt={skill.name}
               />
             </div>
-            <p className="text-sm mt-2 group-hover:text-green-400 transition-colors duration-300">
+            <p className="text-sm mt-2 text-gray-300">
               {skill.name}
             </p>
           </div>
         ))}
       </div>
+
     </section>
   );
 }
