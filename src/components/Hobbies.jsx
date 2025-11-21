@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import guitarImg from "../assets/guitar.png";
 import gamingImg from "../assets/gaming.jpg";
 import gymImg from "../assets/gym.jpg";
+import windowsBg from "../assets/windows.jpg";
+
 
 export default function Hobbies() {
     const [username, setUsername] = useState("");
@@ -13,7 +15,6 @@ export default function Hobbies() {
     const [playBounce, setPlayBounce] = useState(false);
     const [showDesktop, setShowDesktop] = useState(false);
     const navigate = useNavigate();
-
 
     const [autoOpenFolder, setAutoOpenFolder] = useState(false);
     const [startSlideshow, setStartSlideshow] = useState(false);
@@ -77,7 +78,7 @@ export default function Hobbies() {
                 // --- WAIT BEFORE ICON BOUNCE ---
                 setTimeout(() => {
                     setAutoOpenFolder(true);
-                }, 1200); // 1.2s desktop time
+                }, 1200);
 
             }, 500);
 
@@ -91,7 +92,7 @@ export default function Hobbies() {
 
         const openDelay = setTimeout(() => {
             setStartSlideshow(true);
-        }, 1000); // 1 second after bounce
+        }, 1000);
 
         return () => clearTimeout(openDelay);
     }, [autoOpenFolder]);
@@ -103,15 +104,25 @@ export default function Hobbies() {
         let index = 0;
         const interval = setInterval(() => {
             index++;
+
             if (index >= hobbies.length) {
                 clearInterval(interval);
+
+                // 🔙 GÅ TILLBAKA EFTER SISTA BILDEN
+                setTimeout(() => {
+                    setStartSlideshow(false);
+                    setAutoOpenFolder(false);
+                }, 1500);
+
             } else {
                 setCurrentIndex(index);
             }
+
         }, 1800);
 
         return () => clearInterval(interval);
     }, [startSlideshow]);
+
 
 
     return (
@@ -159,7 +170,6 @@ export default function Hobbies() {
 
                         <input
                             type="text"
-                            placeholder="username"
                             className="bg-[#111] border border-gray-600 text-white px-2 py-1 mb-2 w-full outline-none text-sm"
                             value={username}
                             readOnly
@@ -167,7 +177,6 @@ export default function Hobbies() {
 
                         <input
                             type="password"
-                            placeholder="password"
                             className="bg-[#111] border border-gray-600 text-white px-2 py-1 mb-3 w-full outline-none text-sm"
                             value={password}
                             readOnly
@@ -184,40 +193,46 @@ export default function Hobbies() {
 
                 {/* DESKTOP + SLIDESHOW */}
                 <div
-                    className="absolute flex flex-col p-3 text-white"
+                    className="absolute flex flex-col text-white"
                     style={{
                         top: "17.2%",
                         left: "20.3%",
                         width: "59.4%",
                         height: "40.6%",
-                        background: "#1e4aa3",
+                        backgroundImage: `url(${windowsBg})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
                         opacity: showDesktop ? 1 : 0,
                         transition: "opacity 0.4s ease",
                         overflow: "hidden"
                     }}
                 >
-                    {/* DESKTOP ICON */}
+
+                    {/* Ikon */}
                     {!startSlideshow && (
                         <div
-                            className={`flex flex-col items-center w-16 gap-1 
-                                transition ${autoOpenFolder ? "icon-bounce" : ""}`}
+                            className={`flex flex-col items-center w-16 gap-1 mt-3 ml-3 transition ${autoOpenFolder ? "icon-bounce" : ""
+                                }`}
                         >
                             <div className="text-3xl">🗂️</div>
-                            <p className="text-xs text-center leading-tight">Mina_<br />Intressen</p>
+                            <p className="text-xs text-center leading-tight">
+                                Mina_<br />Intressen
+                            </p>
                         </div>
                     )}
 
                     {/* SLIDESHOW */}
                     {startSlideshow && (
-                        <div className="relative w-full h-full">
+                        <div className="absolute inset-0">
                             <img
                                 src={hobbies[currentIndex].img}
                                 alt="hobby"
-                                className="absolute inset-0 w-full h-full object-cover animate-fadeZoom"
+                                className="w-full h-full object-cover animate-fadeZoom"
                             />
-                            <div className="absolute bottom-4 left-0 w-full text-center text-lg font-bold animate-textFade">
+                            <div className="absolute bottom-3 left-0 w-full text-center text-2xl font-bold flame-text">
                                 {hobbies[currentIndex].text}
                             </div>
+
                         </div>
                     )}
                 </div>

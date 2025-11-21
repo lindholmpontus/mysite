@@ -43,6 +43,42 @@
 .typing-block.finished {
   border-right: none;
 }
+/* FLAME TEXT EFFECT */
+.flame-text {
+  color: #ffddaa;
+  text-shadow:
+    0 0 8px #ff9900,
+    0 0 12px #ff6600,
+    0 0 18px #ff3300,
+    0 0 25px #ff0000,
+    0 0 35px #ff6600;
+    
+  animation: flameWobble 0.25s infinite alternate ease-in-out,
+             flameGlow 1.2s infinite ease-in-out,
+             textFade 0.8s ease forwards;
+}
+
+@keyframes flameWobble {
+  0% { transform: translateY(0px) scale(1); }
+  100% { transform: translateY(-2px) scale(1.03) rotate(-1deg); }
+}
+
+@keyframes flameGlow {
+  0% {
+    text-shadow:
+      0 0 6px #ffa733,
+      0 0 10px #ff6600,
+      0 0 15px #ff3300,
+      0 0 22px #cc2200;
+  }
+  100% {
+    text-shadow:
+      0 0 10px #ffcc66,
+      0 0 15px #ff9933,
+      0 0 22px #ff6600,
+      0 0 30px #ff3300;
+  }
+}
 
 
 
