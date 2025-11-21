@@ -24,7 +24,7 @@ export default function Skills() {
 
   return (
     <section className="w-full max-w-2xl bg-[#111]/80 border border-green-900/20 rounded-xl p-8 mb-16">
-      <h2 className="text-green-400 text-2xl font-mono mb-5">{"$ skills"}</h2>
+      <h2 className="text-green-400 text-2xl font-mono mb-5">{"skills"}</h2>
 
       <div className="grid grid-cols-3 gap-6">
         {skills.map((skill) => (

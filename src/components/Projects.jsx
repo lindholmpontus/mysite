@@ -37,7 +37,7 @@ export default function Projects() {
     },
     {
       title: "Examensarbete - Lantmäteriet",
-      desc: "Examensarbete på Lantmäteriet där jag analyserade prestanda, resursanvändning och skalbarhet.",
+      desc: "Examensarbete på Lantmäteriet där jag analyserade prestanda, resursanvändning och skalbarhet i Java-applikationer genom att jämföra GraalVM Native Image och JVM.",
       tags: ["Java", "GraalVM", "Spring Boot"],
       link: "https://hig.diva-portal.org/smash/get/diva2:1973227/FULLTEXT01.pdf",
     },
@@ -59,7 +59,7 @@ export default function Projects() {
 
   return (
     <section className="w-full max-w-2xl bg-[#111]/80 border border-green-900/20 rounded-xl p-8 mb-16">
-      <h2 className="text-green-400 text-2xl font-mono mb-5">{"$ projects"}</h2>
+      <h2 className="text-green-400 text-2xl font-mono mb-5">{"projects"}</h2>
 
       <div className="space-y-5">
         {projects.map((p, i) => (

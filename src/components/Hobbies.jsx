@@ -6,7 +6,7 @@ import guitarImg from "../assets/guitar.png";
 import gamingImg from "../assets/gaming.jpg";
 import gymImg from "../assets/gym.jpg";
 import windowsBg from "../assets/windows.jpg";
-
+import sleepImg from "../assets/sleep.png";
 
 export default function Hobbies() {
     const [username, setUsername] = useState("");
@@ -23,7 +23,8 @@ export default function Hobbies() {
     const hobbies = [
         { img: guitarImg, text: "Spela gitarr" },
         { img: gamingImg, text: "Gamea" },
-        { img: gymImg, text: "Gymma" }
+        { img: gymImg, text: "Gymma" },
+        { img: sleepImg, text: "Vakna från nap" }
     ];
 
     // ---- AUTO TYPE EFFECT ----

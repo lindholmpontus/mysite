@@ -24,7 +24,7 @@ export default function Contact() {
 
   return (
     <section className="w-full max-w-2xl bg-[#111]/80 border border-green-900/20 rounded-xl p-8 mb-24">
-      <h2 className="text-green-400 text-2xl font-mono mb-5">{"$ contact"}</h2>
+      <h2 className="text-green-400 text-2xl font-mono mb-5">{"contact"}</h2>
 
       {showCopied && (
         <p className="text-green-400 font-mono text-sm mb-3 animate-pulse">

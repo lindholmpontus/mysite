@@ -83,13 +83,12 @@ export default function Portfolio() {
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-            {/* GAME */}
+            {/* HOBBIES */}
             <div
-              onClick={() => navigate("/gaming")}
-              className="cursor-pointer border border-green-500 bg-black/40 rounded-lg p-4 font-mono text-green-300 hover:bg-green-500 hover:text-black transition hover:-translate-y-1 hover:rotate-1 text-center"
+              onClick={() => navigate("/hobbies")}
+              className="cursor-pointer border border-blue-500 bg-black/30 rounded-lg p-4 font-mono text-blue-300 hover:bg-blue-500 hover:text-black transition hover:scale-105 hover:brightness-150 text-center"
             >
-              {">"} Gaming Achievements
+              {">"} Ta reda på mina intressen
             </div>
 
             {/* HYPNOTIZE */}
@@ -100,6 +99,16 @@ export default function Portfolio() {
               {">"} Bli hypnotiserad
             </div>
 
+            {/* GAME */}
+            <div
+              onClick={() => navigate("/gaming")}
+              className="cursor-pointer border border-green-500 bg-black/40 rounded-lg p-4 font-mono text-green-300 hover:bg-green-500 hover:text-black transition hover:-translate-y-1 hover:rotate-1 text-center"
+            >
+              {">"} Gaming Achievements
+            </div>
+
+
+
             {/* UNEMPLOYED */}
             <div
               onClick={() => navigate("/unemployedment")}
@@ -108,13 +117,7 @@ export default function Portfolio() {
               {">"} Ladda arbetslöshet
             </div>
 
-            {/* HOBBIES */}
-            <div
-              onClick={() => navigate("/hobbies")}
-              className="cursor-pointer border border-blue-500 bg-black/30 rounded-lg p-4 font-mono text-blue-300 hover:bg-blue-500 hover:text-black transition hover:scale-105 hover:brightness-150 text-center"
-            >
-              {">"} Ta reda på mina intressen
-            </div>
+
 
             {/* UNCLICKABLE WEAKNESS BUTTON */}
             <div

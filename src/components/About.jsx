@@ -115,7 +115,7 @@ export default function About() {
         className={`transition duration-500 
           ${!aboutActive ? "blur-md opacity-40" : "blur-0 opacity-100"}`}
       >
-        <h2 className="text-green-400 text-2xl font-mono mb-5">{"$ about"}</h2>
+        <h2 className="text-green-400 text-2xl font-mono mb-5">{"about"}</h2>
 
         {typedLines.map((line, i) => (
           <div key={i} className="text-gray-200">{line}</div>
