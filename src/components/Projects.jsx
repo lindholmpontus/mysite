@@ -48,6 +48,13 @@ export default function Projects() {
       link: "https://github.com/JohnNorrbom/Klientutvecklingsprojekt",
     },
     {
+      title: "Java Chess",
+      desc: "Ett fullt fungerande Schack spel kodat i Java (ett av mina favoritspråk).",
+      tags: ["Java"],
+      link: "https://github.com/lindholmpontus/javachess",
+    },
+
+    {
       title: "This game will get you drunk",
       desc: "Ett festspel utvecklat för vändor till krogen.",
       tags: ["React", "JavaScript", "TailWind", "FireBase"],
