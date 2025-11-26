@@ -33,7 +33,7 @@ export default function Projects() {
     {
       title: "Projektarbete - Maximalfönster",
       desc: "En intern app för företagets säljare som ersätter manuell fönstermätning. Den låter dem registrera mått digitalt på plats, säkerställer korrekta värden och visar en visuell monteringsskiss i realtid.",
-      tags: ["JavaScript", "php",],
+      tags: ["JavaScript", "React", "TailWind"],
     },
     {
       title: "Examensarbete - Lantmäteriet",
