@@ -43,7 +43,7 @@ export default function Projects() {
     },
         {
       title: "Solar System Simulator (Work in progress)",
-      desc: "En realtidsbaserad solsystemssimulator där planeternas rörelser beräknas med gravitationsmodeller i en Java/Spring-backend, och visualiseras i 3D med React och Three.js",
+      desc: "En solsystemssimulator där planeternas rörelser beräknas med gravitationsmodeller i en Java/Spring-backend och visualiseras i 3D med React och Three.js",
       tags: ["Spring Boot", "Java", "React"],
       link: "https://github.com/lindholmpontus/solsim",
     },
