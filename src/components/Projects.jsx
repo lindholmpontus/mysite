@@ -33,13 +33,19 @@ export default function Projects() {
     {
       title: "Projektarbete - Maximalfönster",
       desc: "En intern app för företagets säljare som ersätter manuell fönstermätning. Den låter dem registrera mått digitalt på plats, säkerställer korrekta värden och visar en visuell monteringsskiss i realtid.",
-      tags: ["JavaScript", "React", "TailWind"],
+      tags: ["React","JavaScript", "TailWind"],
     },
     {
       title: "Examensarbete - Lantmäteriet",
       desc: "Examensarbete på Lantmäteriet där jag analyserade prestanda, resursanvändning och skalbarhet i Java-applikationer genom att jämföra GraalVM Native Image och JVM.",
       tags: ["Java", "GraalVM", "Spring Boot"],
       link: "https://hig.diva-portal.org/smash/get/diva2:1973227/FULLTEXT01.pdf",
+    },
+        {
+      title: "Solar System Simulator (Work in progress)",
+      desc: "En realtidsbaserad solsystemssimulator där planeternas rörelser beräknas med gravitationsmodeller i en Java/Spring-backend, och visualiseras i 3D med React och Three.js",
+      tags: ["Spring Boot", "Java", "React"],
+      link: "https://github.com/lindholmpontus/solsim",
     },
     {
       title: "SpaceParty",
@@ -55,8 +61,8 @@ export default function Projects() {
     },
 
     {
-      title: "This game will get you drunk",
-      desc: "Ett festspel utvecklat för vändor till krogen.",
+      title: "CrazyGame",
+      desc: "Ett festspel utvecklat i React.",
       tags: ["React", "JavaScript", "TailWind", "FireBase"],
       link: "https://github.com/lindholmpontus/crazygame",
     },
