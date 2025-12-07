@@ -47,6 +47,12 @@ export default function Projects() {
       tags: ["Spring Boot", "Java", "React"],
       link: "https://github.com/lindholmpontus/solsim",
     },
+            {
+      title: "Light Finder",
+      desc: "Light Finder är en webapp som hjälper dig att hitta de närmaste platserna med minimal ljusförorening för optimal stjärnskådning. Appen analyserar satellitdata och visar de bästa mörka platserna på en interaktiv karta.",
+      tags: ["Python", "JavaScript", "Leaflet.js"],
+      link: "https://github.com/lindholmpontus/lightfinder",
+    },
     {
       title: "SpaceParty",
       desc: "Online Android multiplayer spel.",
