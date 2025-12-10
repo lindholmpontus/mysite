@@ -48,8 +48,8 @@ export default function Projects() {
       link: "https://github.com/lindholmpontus/solsim",
     },
             {
-      title: "Light Finder",
-      desc: "Light Finder är en webapp som hjälper dig att hitta de närmaste platserna med minimal ljusförorening för optimal stjärnskådning. Appen analyserar satellitdata och visar de bästa mörka platserna på en interaktiv karta.",
+      title: "Dark Finder",
+      desc: "Dark Finder är en webapp som hjälper dig att hitta de närmaste platserna med minimal ljusförorening för optimal stjärnskådning. Appen analyserar satellitdata och visar de bästa mörka platserna på en interaktiv karta.",
       tags: ["Python", "JavaScript", "Leaflet.js"],
       link: "https://github.com/lindholmpontus/lightfinder",
     },
