@@ -3,7 +3,7 @@ import javaLogo from "../assets/java.png";
 import csharpLogo from "../assets/csharp.png";
 import pythonLogo from "../assets/python.png";
 import reactLogo from "../assets/react.png";
-import tailwindLogo from "../assets/tailwind.png";
+import gitLogo from "../assets/git.png";
 import arcgisLogo from "../assets/arcgis.png";
 import sqlLogo from "../assets/sql.png";
 import phpLogo from "../assets/php.svg";
@@ -15,9 +15,9 @@ export default function Skills() {
     { logo: csharpLogo, name: "C#" },
     { logo: pythonLogo, name: "Python" },
     { logo: reactLogo, name: "React" },
-    { logo: tailwindLogo, name: "Tailwind" },
+    { logo: gitLogo, name: "Git" },
     { logo: arcgisLogo, name: "ArcGIS" },
-    { logo: sqlLogo, name: "SQL" },
+    { logo: sqlLogo, name: "PostGreSQL" },
     { logo: phpLogo, name: "PHP" },
     { logo: javascriptLogo, name: "JavaScript" },
   ];
