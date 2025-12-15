@@ -1,6 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
+import ProjectModal from "./ProjectModal";
+import windowsImg from "../assets/windows.jpg";
+import starsImg from "../assets/stars.jpeg";
+import gamingImg from "../assets/gaming.jpg";
+import higImg from "../assets/projects/hig.png";
+import SpacePartyImg from "../assets/projects/SpaceParty.png";
+import chessImg from "../assets/projects/chess.png";
+import darkFinderImg from "../assets/projects/darkfinder.png";
+import solsimVideo from "../assets/projects/solsim.mp4";
+import solsimImg from "../assets/projects/solsim.png";
+import maximalImg from "../assets/projects/maximal.png";
 
 export default function Projects() {
+  const [selectedProject, setSelectedProject] = useState(null);
+
   const getTagColor = (tag) => {
     switch (tag.toLowerCase()) {
       case "java":
@@ -32,94 +45,120 @@ export default function Projects() {
   const projects = [
     {
       title: "Projektarbete - Maximalfönster",
-      desc: "En intern app för företagets säljare som ersätter manuell fönstermätning. Den låter dem registrera mått digitalt på plats, säkerställer korrekta värden och visar en visuell monteringsskiss i realtid.",
-      tags: ["React","JavaScript", "TailWind"],
+      desc: "En intern app för företagets säljare som ersätter manuell fönstermätning.",
+      details: "En intern app för företagets säljare som effektiviserar processen vid manuell fönstermätning. Den låter dem registrera mått digitalt på plats, säkerställer korrekta värden och visar en visuell monteringsskiss i realtid.",
+      tags: ["React", "JavaScript", "TailWind"],
+      image: maximalImg,
+    },
+    {
+      title: "Solar System Simulator (Inte helt färdig)",
+      desc: "Solsystemssimulator med gravitationsmodeller i Java/Spring och 3D-visualisering i React och Three.js.",
+      details: "En solsystemssimulator där planeternas rörelser beräknas med gravitationsmodeller i en Java/Spring-backend och visualiseras i 3D med React och Three.js. Texturen för planeterna är genererade med hjälp av Gemini 3.",
+      tags: ["Spring Boot", "Java", "React", "Three.js"],
+      github: "https://github.com/lindholmpontus/solsim",
+      image: solsimImg,
+      video: solsimVideo,
     },
     {
       title: "Examensarbete - Lantmäteriet",
-      desc: "Examensarbete på Lantmäteriet där jag analyserade prestanda, resursanvändning och skalbarhet i Java-applikationer genom att jämföra GraalVM Native Image och JVM.",
+      desc: "Analys av prestanda och resursanvändning i Java-applikationer (GraalVM vs JVM).",
+      details: "Examensarbete på Lantmäteriet där jag analyserade prestanda, resursanvändning och skalbarhet i Java-applikationer genom att jämföra GraalVM Native Image och JVM.",
       tags: ["Java", "GraalVM", "Spring Boot"],
-      link: "https://hig.diva-portal.org/smash/get/diva2:1973227/FULLTEXT01.pdf",
+      link: "https://hig.diva-portal.org/smash/get/diva2:1973227/FULLTEXT01.pdf", // Paper link
+      image: higImg,
     },
-        {
-      title: "Solar System Simulator (Work in progress)",
-      desc: "En solsystemssimulator där planeternas rörelser beräknas med gravitationsmodeller i en Java/Spring-backend och visualiseras i 3D med React och Three.js",
-      tags: ["Spring Boot", "Java", "React"],
-      link: "https://github.com/lindholmpontus/solsim",
-    },
-            {
+
+    {
       title: "Dark Finder",
-      desc: "Dark Finder är en webapp som hjälper dig att hitta de närmaste platserna med minimal ljusförorening för optimal stjärnskådning. Appen analyserar satellitdata och visar de bästa mörka platserna på en interaktiv karta.",
+      desc: "Webbapp för att hitta platser med minimal ljusförorening för stjärnskådning.",
+      details: "Dark Finder är en webapp som hjälper dig att hitta de närmaste platserna med minimal ljusförorening för optimal stjärnskådning. Appen analyserar satellitdata och visar de bästa mörka platserna på en interaktiv karta. Använder Leaflet.js för kartvisualisering.",
       tags: ["Python", "JavaScript", "Leaflet.js"],
-      link: "https://github.com/lindholmpontus/lightfinder",
+      github: "https://github.com/lindholmpontus/lightfinder",
+      image: darkFinderImg,
     },
     {
       title: "SpaceParty",
       desc: "Online Android multiplayer spel.",
+      details: "Ett multiplayer-spel för Android med inspiration från Mario Party. Spelet är ett brädspel där olika minigames kan triggas när en spelare går på en minigame-ruta. Byggt med Kotlin och använder Firebase för realtidsdatabas.",
       tags: ["Kotlin", "FireBase", "Android Studio"],
-      link: "https://github.com/JohnNorrbom/Klientutvecklingsprojekt",
+      github: "https://github.com/JohnNorrbom/Klientutvecklingsprojekt",
+      image: SpacePartyImg,
     },
     {
       title: "Java Chess",
-      desc: "Ett fullt fungerande Schack spel kodat i Java (ett av mina favoritspråk).",
+      desc: "Ett fullt fungerande Schack-spel kodat i Java.",
+      details: "Ett klassiskt schackspel implementerat i Java. Tyvärr gjort i Java Swing som är (väldigt) outdated just nu.",
       tags: ["Java"],
-      link: "https://github.com/lindholmpontus/javachess",
+      github: "https://github.com/lindholmpontus/javachess",
+      image: chessImg,
     },
-
-    {
-      title: "CrazyGame",
-      desc: "Ett festspel utvecklat i React.",
-      tags: ["React", "JavaScript", "TailWind", "FireBase"],
-      link: "https://github.com/lindholmpontus/crazygame",
-    },
-
-
   ];
 
   return (
-    <section className="w-full max-w-2xl bg-[#111]/80 border border-green-900/20 rounded-xl p-8 mb-16">
-      <h2 className="text-green-400 text-2xl font-mono mb-5">{"projects"}</h2>
+    <>
+      <section className="w-full max-w-2xl bg-[#111]/80 border border-green-900/20 rounded-xl p-8 mb-16">
+        <h2 className="text-green-400 text-2xl font-mono mb-5">{"projects"}</h2>
 
-      <div className="space-y-5">
-        {projects.map((p, i) => (
-          <div
-            key={i}
-            className="border border-white/10 bg-black/40 rounded-lg p-5 text-left 
-                 transition duration-300 hover:scale-[1.03] hover:shadow-xl hover:shadow-white/10"
-          >
-            {/* TITLE – vit istället för grön */}
-            <h3 className="text-white font-mono text-xl mb-2">{p.title}</h3>
-
-            {/* DESC – ljusgrå och mer lättläst */}
-            <p className="text-gray-300 text-sm mb-3 leading-5 font-mono opacity-90">
-              {p.desc}
-            </p>
-
-            {/* TAGS – dina färger används här, blir riktigt snygg mix */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              {p.tags.map((tag, idx) => (
-                <span
-                  key={idx}
-                  className={`text-xs font-mono px-2 py-0.5 rounded-full border transition duration-200 hover:scale-110 ${getTagColor(tag)}`}
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-
-            {/* BUTTON – lite elegantare blåvit tema */}
-            <a
-              href={p.link}
-              target="_blank"
-              className="inline-block border border-blue-400 text-blue-300 font-mono px-3 py-1 rounded 
-                   hover:bg-blue-400 hover:text-black transition text-xs"
+        <div className="space-y-5">
+          {projects.map((p, i) => (
+            <div
+              key={i}
+              className="border border-white/10 bg-black/40 rounded-lg p-5 text-left 
+                   transition duration-300 hover:scale-[1.03] hover:shadow-xl hover:shadow-white/10 flex flex-col sm:flex-row gap-4 items-start sm:items-center"
             >
-              {">"} View Project
-            </a>
-          </div>
-        ))}
-      </div>
+              {/* Optional Thumbnail in List View */}
+              <div className="w-full sm:w-24 h-24 flex-shrink-0 bg-black/50 rounded-md overflow-hidden border border-white/5 hidden sm:block">
+                {p.image ? (
+                  <img src={p.image} alt={p.title} className="w-full h-full object-cover opacity-80" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-700 text-xs">No Img</div>
+                )}
+              </div>
 
-    </section>
+              <div className="flex-grow">
+                {/* TITLE */}
+                <h3 className="text-white font-mono text-xl mb-2">{p.title}</h3>
+
+                {/* DESC */}
+                <p className="text-gray-300 text-sm mb-3 leading-5 font-mono opacity-90 line-clamp-2">
+                  {p.desc}
+                </p>
+
+                {/* TAGS */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {p.tags.map((tag, idx) => (
+                    <span
+                      key={idx}
+                      className={`text-xs font-mono px-2 py-0.5 rounded-full border transition duration-200 hover:scale-110 ${getTagColor(
+                        tag
+                      )}`}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                {/* BUTTON */}
+                <button
+                  onClick={() => setSelectedProject(p)}
+                  className="inline-block border border-blue-400 text-blue-300 font-mono px-3 py-1 rounded 
+                       hover:bg-blue-400 hover:text-black transition text-xs cursor-pointer"
+                >
+                  {">"} View Project
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Modal Integration */}
+      {selectedProject && (
+        <ProjectModal
+          project={selectedProject}
+          onClose={() => setSelectedProject(null)}
+        />
+      )}
+    </>
   );
 }
