@@ -30,7 +30,7 @@ export default function Portfolio() {
         {/* HERO */}
         <header className="pt-20 pb-16">
           <h1
-            className={`text-white-400 text-4xl md:text-6xl font-mono typing-effect overflow-hidden leading-[1.2] py-1 ${heroDone ? "no-cursor" : ""}`}
+            className={`text-white-400 text-xl sm:text-3xl md:text-5xl lg:text-6xl font-mono typing-effect overflow-hidden leading-[1.2] py-1 ${heroDone ? "no-cursor" : ""}`}
             onAnimationEnd={() => setHeroDone(true)}
           >
             Hej! Jag heter Pontus Lindholm
