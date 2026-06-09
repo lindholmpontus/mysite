@@ -1,1 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200"><rect width="200" height="200" fill="url('#gradient')"></rect><defs><linearGradient id="gradient" gradientTransform="rotate(45 0.5 0.5)"><stop offset="0%" stop-color="#1f2f1e"></stop><stop offset="100%" stop-color="#000000"></stop></linearGradient></defs><g><g fill="#000000" transform="matrix(12.659340659340659,0,0,12.659340659340659,15.562270867955561,190.007288644602)" stroke="#364134" stroke-width="0.2"><path d="M6.69-4.82L4.50-4.82L4.50 0L1.07 0L1.07-14.22L6.75-14.22Q8.38-14.22 9.63-13.62Q10.89-13.02 11.58-11.91Q12.27-10.80 12.27-9.39L12.27-9.39Q12.27-7.31 10.78-6.07Q9.29-4.82 6.69-4.82L6.69-4.82ZM4.50-11.57L4.50-7.47L6.75-7.47Q7.74-7.47 8.27-7.97Q8.79-8.47 8.79-9.38L8.79-9.38Q8.79-10.37 8.25-10.97Q7.71-11.56 6.79-11.57L6.79-11.57L4.50-11.57Z"></path></g></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="planet" cx="40%" cy="34%" r="78%">
+      <stop offset="0%" stop-color="#dff0ff" />
+      <stop offset="50%" stop-color="#5b9dff" />
+      <stop offset="100%" stop-color="#243a73" />
+    </radialGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#05070d" />
+  <!-- ring behind the planet -->
+  <ellipse cx="32" cy="32" rx="27" ry="8.5" fill="none" stroke="#9fc1ff" stroke-width="2.4" opacity="0.55"
+           transform="rotate(-20 32 32)" />
+  <!-- planet -->
+  <circle cx="32" cy="32" r="12.5" fill="url(#planet)" />
+  <!-- ring front (over the planet's lower half) -->
+  <path d="M 8.7 38.2 A 27 8.5 -20 0 0 55.3 25.8" fill="none" stroke="#dce9ff" stroke-width="2.4"
+        stroke-linecap="round" opacity="0.95" />
+</svg>

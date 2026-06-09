@@ -1,7 +1,6 @@
 // content.js — all portfolio copy in English, in one place.
 import javaLogo from "../assets/java.png";
 import pythonLogo from "../assets/python.png";
-import reactLogo from "../assets/react.png";
 import gitLogo from "../assets/git.png";
 import javascriptLogo from "../assets/javascript.png";
 import fabricLogo from "../assets/Fabric_final_x256.png";
@@ -38,7 +37,6 @@ export const SKILLS = [
   { logo: javaLogo, name: "Java" },
   { logo: pythonLogo, name: "Python" },
   { logo: javascriptLogo, name: "JavaScript" },
-  { logo: reactLogo, name: "React" },
   { logo: gitLogo, name: "Git" },
 ];
 

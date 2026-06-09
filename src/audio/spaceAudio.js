@@ -13,22 +13,10 @@ let ctx = null;
 let master = null;
 let engineGain = null;
 let engineFilter = null;
+let engineOscs = [];
 let started = false;
 let muted = false;
 let raf = 0;
-
-function noiseBuffer(seconds) {
-  const len = Math.floor(ctx.sampleRate * seconds);
-  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
-  const d = buf.getChannelData(0);
-  let last = 0;
-  for (let i = 0; i < len; i++) {
-    const white = Math.random() * 2 - 1;
-    last = (last + 0.02 * white) / 1.02; // brown-ish noise = smooth rush, no hiss
-    d[i] = last * 3.2;
-  }
-  return buf;
-}
 
 function buildGraph() {
   master = ctx.createGain();
@@ -71,28 +59,44 @@ function buildGraph() {
   lfoGain.connect(lp.frequency);
   lfo.start();
 
-  // ---- engine rush: brown noise, gain + brightness driven by warp ----
-  const src = ctx.createBufferSource();
-  src.buffer = noiseBuffer(3);
-  src.loop = true;
+  // ---- engine thrust: a deep electronic hum that opens up with warp. Tonal
+  // (oscillators, not noise) — there's no air in space, so no windy rush. ----
   engineFilter = ctx.createBiquadFilter();
-  engineFilter.type = "bandpass";
-  engineFilter.frequency.value = 320;
-  engineFilter.Q.value = 0.6;
+  engineFilter.type = "lowpass";
+  engineFilter.frequency.value = 70;
+  engineFilter.Q.value = 1.2;
   engineGain = ctx.createGain();
   engineGain.gain.value = 0;
-  src.connect(engineFilter);
   engineFilter.connect(engineGain);
   engineGain.connect(master);
-  src.start();
+  engineOscs = [
+    [42, "sawtooth", 0.5],
+    [42.5, "sawtooth", 0.45], // slight detune → slow beat, a "living" idle
+    [84, "sine", 0.6], // octave sub for body
+  ].map(([f, type, g]) => {
+    const o = ctx.createOscillator();
+    o.type = type;
+    o.frequency.value = f;
+    o.baseFreq = f;
+    const og = ctx.createGain();
+    og.gain.value = g;
+    o.connect(og);
+    og.connect(engineFilter);
+    o.start();
+    return o;
+  });
 }
 
 function tick() {
   if (!ctx) return;
   const warp = journeyState.warp || 0;
   const now = ctx.currentTime;
-  engineGain.gain.setTargetAtTime(Math.min(1, warp * 1.4) * 0.13, now, 0.12);
-  engineFilter.frequency.setTargetAtTime(420 + warp * 900, now, 0.12);
+  engineGain.gain.setTargetAtTime(Math.min(1, warp * 1.5) * 0.16, now, 0.12);
+  // open the filter as you speed up (more harmonics = more "power"), but keep it
+  // low enough to stay a hum, never a hiss
+  engineFilter.frequency.setTargetAtTime(70 + warp * 320, now, 0.12);
+  // a subtle pitch "rev" with speed
+  for (const o of engineOscs) o.frequency.setTargetAtTime(o.baseFreq * (1 + warp * 0.22), now, 0.15);
   raf = requestAnimationFrame(tick);
 }
 
@@ -169,26 +173,29 @@ export function playScan() {
   o.stop(now + 1.3);
 }
 
-// short rising whoosh when departing a stop
+// a short tonal thrust surge when departing a stop (an engine "kick", not a
+// windy whoosh)
 export function playDepart() {
   if (!ctx || muted) return;
   const now = ctx.currentTime;
-  const src = ctx.createBufferSource();
-  src.buffer = noiseBuffer(0.8);
-  const bp = ctx.createBiquadFilter();
-  bp.type = "bandpass";
-  bp.Q.value = 0.8;
-  bp.frequency.setValueAtTime(220, now);
-  bp.frequency.exponentialRampToValueAtTime(1100, now + 0.5);
+  const o = ctx.createOscillator();
+  o.type = "sawtooth";
+  o.frequency.setValueAtTime(70, now);
+  o.frequency.exponentialRampToValueAtTime(150, now + 0.5);
+  const lp = ctx.createBiquadFilter();
+  lp.type = "lowpass";
+  lp.frequency.setValueAtTime(180, now);
+  lp.frequency.exponentialRampToValueAtTime(720, now + 0.4);
+  lp.Q.value = 1.0;
   const g = ctx.createGain();
   g.gain.setValueAtTime(0, now);
-  g.gain.linearRampToValueAtTime(0.18, now + 0.12);
+  g.gain.linearRampToValueAtTime(0.14, now + 0.1);
   g.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
-  src.connect(bp);
-  bp.connect(g);
+  o.connect(lp);
+  lp.connect(g);
   g.connect(master);
-  src.start(now);
-  src.stop(now + 0.75);
+  o.start(now);
+  o.stop(now + 0.75);
 }
 
 export function disposeAudio() {
