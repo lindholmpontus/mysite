@@ -16,6 +16,10 @@ export default function ProgressRail({ progress, active, onJump, recovered }) {
   // clicks teleport (handled by the parent) — only scrolling flies the route
   const jumpTo = (i) => onJump?.(i);
 
+  // at journey's end the deep-space "mission complete" summary takes over the
+  // screen, so the rail steps aside (and never collides with it)
+  if (active.index >= STOPS.length - 1) return null;
+
   return (
     <nav
       aria-label="Fast travel to a stop"
@@ -37,6 +41,8 @@ export default function ProgressRail({ progress, active, onJump, recovered }) {
         {STOPS.map((stop, i) => {
           const isActive = active.index === i;
           const isRecovered = !!recovered?.has(i);
+          // keep labels compact so the always-on menu never reaches the panels
+          const label = stop.label.length > 10 ? stop.label.split(" ")[0] : stop.label;
           return (
             <button
               key={stop.id}
@@ -62,12 +68,19 @@ export default function ProgressRail({ progress, active, onJump, recovered }) {
                       : "none",
                 }}
               />
-              {/* hover label */}
+              {/* always-on label — the rail reads as a full menu */}
               <span
-                className="absolute right-7 whitespace-nowrap font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-1 rounded border border-white/10 bg-black/60 backdrop-blur-md opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-200 pointer-events-none hidden sm:block"
-                style={{ color: isActive ? stop.accent : "rgba(255,255,255,0.7)" }}
+                className="absolute right-7 whitespace-nowrap font-mono text-[9px] sm:text-[10px] tracking-[0.18em] uppercase transition-colors duration-200 pointer-events-none hidden sm:block"
+                style={{
+                  color: isActive
+                    ? stop.accent
+                    : isRecovered
+                      ? "rgba(255,255,255,0.7)"
+                      : "rgba(255,255,255,0.38)",
+                  textShadow: isActive ? `0 0 10px ${stop.accent}` : "0 0 6px rgba(0,0,0,0.9)",
+                }}
               >
-                {stop.label}
+                {label}
               </span>
             </button>
           );
