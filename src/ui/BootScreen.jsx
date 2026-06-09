@@ -47,18 +47,18 @@ function Terminal({ onJackIn }) {
         </p>
       </div>
 
-      {/* the JACK IN payoff — centered, inside the screen. Appears early so you
-          can proceed right away (the message keeps decoding above it). */}
+      {/* the JACK IN payoff — centered, inside the screen. Appears once the
+          last message line has finished decoding (~3.5s: 2700ms delay + ~30
+          chars × 26ms — retune if the ScrambleText lines change). */}
       <Motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.2, duration: 0.5 }}
+        transition={{ delay: 3.6, duration: 0.6 }}
         className="relative z-10 flex justify-center"
       >
         <button
           onClick={onJackIn}
-          className="group font-mono text-[11px] sm:text-sm tracking-[0.22em] uppercase px-5 sm:px-8 py-2.5 sm:py-3 rounded transition-all duration-200 cursor-pointer"
-          style={{ border: `1px solid ${ACCENT}`, color: ACCENT, background: "rgba(200,215,232,0.08)", boxShadow: "0 0 20px rgba(200,215,232,0.28)" }}
+          className="boot-cta group font-mono text-[11px] sm:text-sm tracking-[0.22em] uppercase px-5 sm:px-8 py-2.5 sm:py-3 rounded transition-all duration-200 cursor-pointer"
         >
           <span className="inline-block mr-2 group-hover:translate-x-0.5 transition-transform">▶</span>
           begin recovery

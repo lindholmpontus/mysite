@@ -57,14 +57,26 @@ export default function Rocket() {
         targetRoll,
         dt * 6
       );
+      // ship reads slightly smaller (planets feel bigger by contrast) and
+      // stretches along its axis at warp — the classic lightspeed cue
+      const sBase = 0.85;
+      modelRef.current.scale.set(
+        sBase * (1 - warp * 0.04),
+        sBase * (1 - warp * 0.04),
+        sBase * (1 + warp * 0.12)
+      );
     }
 
-    // engine plume + glow scale with warp (plus a little idle flicker)
+    // engine plume + glow scale with warp (plus a little idle flicker).
+    // Keep the stretch SHORT: the cone is base-anchored, so scale.y is the
+    // FULL tail length, and the camera sits only ~8.5 behind the ship at warp
+    // — a long tail reaches the view and blooms into a fat pillar (warp*3.0
+    // even swept past the camera as speed fluctuated)
     if (exhaustRef.current) {
       const flicker = Math.sin(t * 31) * 0.07 + Math.sin(t * 53) * 0.05;
-      const target = 0.45 + warp * 2.2 + flicker * (0.3 + warp);
+      const target = 0.45 + warp * 1.1 + flicker * (0.3 + warp);
       exhaustRef.current.scale.y = THREE.MathUtils.lerp(exhaustRef.current.scale.y, target, dt * 10);
-      if (exhaustRef.current.material) exhaustRef.current.material.opacity = 0.25 + warp * 0.55;
+      if (exhaustRef.current.material) exhaustRef.current.material.opacity = 0.22 + warp * 0.28;
     }
     if (lightRef.current) lightRef.current.intensity = 1 + warp * 3;
   }, -1);

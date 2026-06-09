@@ -1,35 +1,38 @@
 // CameraRig.jsx — the only thing that moves the camera. Reads the page scroll
 // progress (a framer-motion MotionValue), damps it, and drives position/lookAt
-// along the journey curve with a HARD WORLD-SPEED CAP: each frame's progress
-// step is shrunk until the camera's path movement fits the speed budget, so
-// the flight between planets always takes real seconds, no matter how hard
-// you scroll. Also handles instant teleports (progress-rail clicks), banks the
-// camera into turns, kicks the FOV at warp, and publishes everything to
-// `journeyState` + MotionValues for the HUD.
+// along the journey curve under TWO HARD BUDGETS: each frame's progress step
+// is shrunk until (a) the camera's path movement fits the world-speed budget
+// (MAX_WORLD_SPEED shaped per-leg by speedMultAt — punch out, surge mid-leg,
+// brake in) and (b) the view direction's swing fits the turn-rate budget
+// (MAX_TURN_RATE), so the ship slows through banked turns instead of whipping.
+// Also handles instant teleports (progress-rail clicks), banks the camera into
+// turns, kicks the FOV at warp, adds a faint engine rumble at speed, and
+// publishes everything to `journeyState` + MotionValues for the HUD.
 /* eslint-disable react-hooks/immutability -- intentional per-frame mutation of camera + shared journey singletons */
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import {
   sampleJourney,
   journeyState,
+  prefersReducedMotion,
+  keepFor,
+  SUN_KEEP,
+  speedMultAt,
   CAM_FOV,
   FOV_KICK,
   MAX_WORLD_SPEED,
+  MAX_TURN_RATE,
   SCROLL_RATE_BASE,
   SCROLL_RATE_GAIN,
 } from "./journeyConfig";
-import { PLANETS, SUN_RADIUS } from "../scene/planets.config";
+import { PLANETS } from "../scene/planets.config";
 
-// keep-out spheres so the camera arcs AROUND bodies instead of through them.
-// keep = how far off-center the camera must stay. For planets it's just under
-// the parking distance (~3.2*r + 8), so a flyby sweeps past at about the same
-// comfortable size you orbit at — never skimming the surface, never clipping.
-// The sun keeps a small margin so the launch leg (which passes ~17 off it) is
-// left alone.
+// keep-out spheres so the camera arcs AROUND bodies instead of through them
+// (same keepFor the route is baked with — this is just a silent safety floor).
 const BODIES = [
-  ...PLANETS.map((p) => ({ c: new THREE.Vector3(...p.position), keep: p.radius * 3.5 + 4 })),
-  { c: new THREE.Vector3(0, 0, 0), keep: SUN_RADIUS + 6 },
+  ...PLANETS.map((p) => ({ c: new THREE.Vector3(...p.position), keep: keepFor(p.radius) })),
+  { c: new THREE.Vector3(0, 0, 0), keep: SUN_KEEP },
 ];
 
 // reusable temporaries (no per-frame allocations)
@@ -40,6 +43,8 @@ const _right = new THREE.Vector3();
 const _pathA = new THREE.Vector3();
 const _pathB = new THREE.Vector3();
 const _tgtTmp = new THREE.Vector3();
+const _dirA = new THREE.Vector3();
+const _dirB = new THREE.Vector3();
 const _lookT = new THREE.Vector3();
 const _av = new THREE.Vector3();
 
@@ -56,6 +61,7 @@ function pushOut(v) {
 
 export default function CameraRig({ progress, flightMV, speedMV, warpMV }) {
   const { camera } = useThree();
+  const reduced = useMemo(() => prefersReducedMotion(), []);
   const sm = useRef(null);
   if (sm.current === null) {
     sm.current = {
@@ -72,7 +78,8 @@ export default function CameraRig({ progress, flightMV, speedMV, warpMV }) {
   // priority -2: runs before the rocket/streaks (-1), so they always read
   // THIS frame's camera transform (a rigidly-attached ship can't lag a frame)
   useFrame((r3f, delta) => {
-    const dt = Math.min(delta, 1 / 30);
+    // floor keeps the budget math finite (step /= over) on a zero-delta frame
+    const dt = THREE.MathUtils.clamp(delta, 1e-4, 1 / 30);
     const s = sm.current;
 
     // 0) teleport request (progress-rail click): snap, re-seed, zero velocity
@@ -88,20 +95,28 @@ export default function CameraRig({ progress, flightMV, speedMV, warpMV }) {
     const maxStep = (SCROLL_RATE_BASE + Math.abs(gap) * SCROLL_RATE_GAIN) * dt;
     let step = THREE.MathUtils.clamp(gap * (1 - Math.exp(-3.4 * dt)), -maxStep, maxStep);
 
-    // 2) world-speed budget: shrink the step until the camera's actual path
-    // movement fits MAX_WORLD_SPEED (progress isn't proportional to distance —
-    // an entire 125-unit leg lives in a small scroll window)
+    // 2) flight budgets: shrink the step until BOTH fit —
+    //    a) world-speed: path movement ≤ MAX_WORLD_SPEED shaped by the per-leg
+    //       profile (punch out, surge mid-leg, brake flare in)
+    //    b) turn-rate: view-direction swing ≤ MAX_TURN_RATE, so the ship slows
+    //       through banked turns instead of whipping the horizon
+    // (progress isn't proportional to distance — an entire 190-unit leg lives
+    // in a small scroll window). Curve speed and curvature vary within a step,
+    // so refine iteratively.
     if (step !== 0) {
-      const budget = MAX_WORLD_SPEED * dt;
+      const budget =
+        MAX_WORLD_SPEED * Math.min(speedMultAt(s.t), speedMultAt(s.t + step)) * dt;
+      const turnBudget = MAX_TURN_RATE * dt;
       sampleJourney(s.t, _pathA, _tgtTmp);
-      sampleJourney(s.t + step, _pathB, _tgtTmp);
-      let move = _pathA.distanceTo(_pathB);
-      if (move > budget) {
-        step *= budget / move;
-        // refine once — curve speed varies within the step
+      _dirA.copy(_tgtTmp).sub(_pathA).normalize();
+      for (let it = 0; it < 4; it++) {
         sampleJourney(s.t + step, _pathB, _tgtTmp);
-        move = _pathA.distanceTo(_pathB);
-        if (move > budget) step *= budget / move;
+        const move = _pathA.distanceTo(_pathB);
+        _dirB.copy(_tgtTmp).sub(_pathB).normalize();
+        const turn = _dirA.angleTo(_dirB);
+        const over = Math.max(move / budget, turn / turnBudget);
+        if (over <= 1.001) break;
+        step /= over;
       }
     }
     s.t += step;
@@ -136,8 +151,17 @@ export default function CameraRig({ progress, flightMV, speedMV, warpMV }) {
     _vel.copy(s.pos).sub(s.prevPos).divideScalar(dt || 1e-3);
     const speed = _vel.length();
     s.prevPos.copy(s.pos);
+    const warp = THREE.MathUtils.clamp(speed / MAX_WORLD_SPEED, 0, 1);
 
     camera.position.copy(s.pos);
+    // engine micro-rumble at speed: a faint multi-sine jitter (warp² so it only
+    // bites near full speed). Purely cosmetic — applied AFTER s.pos so it never
+    // feeds back into velocity/banking. Skipped for reduced-motion users.
+    if (!reduced && warp > 0.15) {
+      const amp = warp * warp * 0.09;
+      camera.position.x += (Math.sin(time * 37.7) + Math.sin(time * 59.3 + 1.7)) * 0.5 * amp;
+      camera.position.y += (Math.sin(time * 43.1 + 0.9) + Math.sin(time * 67.9 + 2.3)) * 0.5 * amp;
+    }
     camera.up.set(0, 1, 0);
     // portrait (mobile): aim below the focus so the planet rides up into the
     // top half of the screen, leaving the bottom half for the info sheet
@@ -149,14 +173,15 @@ export default function CameraRig({ progress, flightMV, speedMV, warpMV }) {
       camera.lookAt(s.tgt);
     }
 
-    // 5) bank into lateral motion (roll around the view axis)
+    // 5) bank into lateral motion (roll around the view axis), plus a touch of
+    // roll rumble at warp
     _right.set(1, 0, 0).applyQuaternion(camera.quaternion);
     const rollTarget = THREE.MathUtils.clamp(-_vel.dot(_right) * 0.014, -0.2, 0.2);
     s.roll += (rollTarget - s.roll) * (1 - Math.exp(-4 * dt));
-    camera.rotateZ(s.roll);
+    const rollJitter = reduced ? 0 : Math.sin(time * 51.3) * 0.005 * warp * warp;
+    camera.rotateZ(s.roll + rollJitter);
 
     // 6) FOV widens with speed — normalized to the world-speed cap
-    const warp = THREE.MathUtils.clamp(speed / MAX_WORLD_SPEED, 0, 1);
     const fovTarget = CAM_FOV + FOV_KICK * warp;
     s.fov += (fovTarget - s.fov) * (1 - Math.exp(-4 * dt));
     if (Math.abs(camera.fov - s.fov) > 0.01) {

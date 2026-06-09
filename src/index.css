@@ -158,6 +158,26 @@ html {
 }
 .crt-cursor { animation: crtBlink 0.8s step-end infinite; }
 
+/* Boot-terminal CTA (begin recovery) — base + an unmissable hover: the whole
+   button brightens, lifts and glows, not just the ▶ nudge */
+.boot-cta {
+  border: 1px solid #c9d6e4;
+  color: #c9d6e4;
+  background: rgba(200, 215, 232, 0.08);
+  box-shadow: 0 0 20px rgba(200, 215, 232, 0.28);
+}
+.boot-cta:hover {
+  border-color: #ffffff;
+  color: #ffffff;
+  background: rgba(200, 215, 232, 0.24);
+  box-shadow: 0 0 38px rgba(200, 215, 232, 0.6), inset 0 0 14px rgba(200, 215, 232, 0.18);
+  transform: translateY(-1px);
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+}
+.boot-cta:active {
+  transform: translateY(0) scale(0.98);
+}
+
 /* Slim space-themed scrollbar for panels */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;

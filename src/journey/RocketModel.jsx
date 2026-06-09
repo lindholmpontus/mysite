@@ -55,15 +55,34 @@ export default function RocketModel({ exhaustRef, lightRef }) {
         <meshStandardMaterial color="#7fb4ff" emissive="#4d9bff" emissiveIntensity={3} toneMapped={false} />
       </mesh>
 
-      {/* engine plume — soft additive cone, stretched by warp */}
-      <mesh ref={exhaustRef} position={[0, 0, 1.4]} rotation={[Math.PI / 2, 0, 0]}>
-        <coneGeometry args={[0.26, 2.4, 16, 1, true]} />
+      {/* engine plume — soft additive cone, stretched by warp. The geometry is
+          translated so its BASE sits at the mesh origin (the engine disc):
+          scale.y then stretches the tail BACKWARD only — a center-anchored
+          cone grew through the hull and poked out past the nose at full warp.
+          Vertex colors fade to black toward the tail tip (black = invisible
+          under additive blending): the plume points almost straight AT the
+          camera, and a uniform double-sided cone projected end-on read as a
+          solid detached pillar running off the bottom of the screen. */}
+      <mesh ref={exhaustRef} position={[0, 0, 1.3]} rotation={[Math.PI / 2, 0, 0]}>
+        <coneGeometry
+          args={[0.18, 2.4, 16, 6, true]}
+          onUpdate={(g) => {
+            g.translate(0, 1.2, 0);
+            const pos = g.attributes.position;
+            const col = new Float32Array(pos.count * 3);
+            for (let i = 0; i < pos.count; i++) {
+              const f = Math.max(0, 1 - pos.getY(i) / 2.4); // 1 at engine, 0 at tip
+              col[i * 3] = col[i * 3 + 1] = col[i * 3 + 2] = f * f;
+            }
+            g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+          }}
+        />
         <meshBasicMaterial
           color="#6ea8ff"
+          vertexColors
           transparent
           opacity={0.4}
           depthWrite={false}
-          side={THREE.DoubleSide}
           blending={THREE.AdditiveBlending}
           toneMapped={false}
         />

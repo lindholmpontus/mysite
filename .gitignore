@@ -42,3 +42,6 @@ build/
 
 # Claude Code local tooling / skills
 .claude/
+
+# smoke-test artifacts
+scripts/smoke-out/

@@ -9,6 +9,7 @@ import Starfield from "../scene/Starfield";
 import Sun from "../scene/Sun";
 import Planet from "../scene/Planet";
 import Asteroids from "../scene/Asteroids";
+import SpaceDust from "../scene/SpaceDust";
 import Rocket from "./Rocket";
 import WarpStreaks from "./WarpStreaks";
 import CameraRig from "./CameraRig";
@@ -40,13 +41,16 @@ export default function JourneyWorld({
           Career -> Projects leg flies through it */}
       {quality !== "low" && (
         <Asteroids
-          position={[0, 6, -323]}
-          innerRadius={20}
-          outerRadius={120}
-          ySpread={18}
+          position={[0, 6, -425]}
+          innerRadius={24}
+          outerRadius={140}
+          ySpread={20}
           count={quality === "medium" ? 110 : 190}
         />
       )}
+
+      {/* near-field dust — the thing that makes speed visible on every leg */}
+      {quality !== "low" && <SpaceDust count={quality === "medium" ? 220 : 380} />}
 
       <Rocket />
       {quality !== "low" && <WarpStreaks />}

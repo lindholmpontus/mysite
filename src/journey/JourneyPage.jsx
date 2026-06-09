@@ -69,16 +69,22 @@ export default function JourneyPage() {
   // (no quiet-timer — you can leave the instant you make a fresh scroll).
   const arrivedRef = useRef(true);
 
-  // navigation: fly (capped) to a stop, or teleport (rail / return-to-launch)
+  // navigation: fly (capped) to a stop, or teleport (rail / return-to-launch).
+  // Both BAIL on a no-op target: clearing arrivedRef without an actual flight
+  // would wedge input forever (the ship never moves -> `active` never changes
+  // -> nothing ever sets arrivedRef back). This was the "scroll up at launch
+  // and you can never launch" bug.
   const flyTo = (i) => {
     const t = clampIdx(i);
-    if (t !== targetRef.current) playDepart(); // thrust whoosh when we actually move
+    if (t === targetRef.current) return; // already there / already heading there
+    playDepart(); // thrust whoosh when we actually move
     targetRef.current = t;
     arrivedRef.current = false; // a new flight: not arrived until we get there
     progress.set(scrollTargetFor(t));
   };
   const teleportTo = (i) => {
     const t = clampIdx(i);
+    if (t === targetRef.current && arrivedRef.current) return; // parked here already
     targetRef.current = t;
     arrivedRef.current = false;
     requestSnap(scrollTargetFor(t)); // tells CameraRig to jump, not fly
@@ -119,7 +125,14 @@ export default function JourneyPage() {
   useEffect(() => {
     const GAP = 160; // ms; a longer pause starts a new gesture
     const io = { lastWheel: 0, accum: 0, stepped: false, valid: false, touchY: 0, touchStepped: false, touchValid: false, lastKey: 0 };
-    const step = (dir) => flyTo(targetRef.current + dir);
+    // at the route's ends any gesture moves you away: scrolling UP at launch
+    // still launches, scrolling DOWN at deep space heads back
+    const step = (dir) => {
+      let next = targetRef.current + dir;
+      if (next < 0) next = 1;
+      else if (next > LAST) next = LAST - 1;
+      flyTo(next);
+    };
     const panelScrolls = (target, dy) => {
       const el = target?.closest?.("[data-journey-scroll]");
       if (!el) return false;

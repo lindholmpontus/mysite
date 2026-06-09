@@ -1,36 +1,44 @@
 // journeyConfig.js — the scroll-driven space journey in one place.
 //
-// Designed for MAXIMUM SMOOTHNESS. The camera flies a DEAD-STRAIGHT lane down
-// -Z at x=0, raised to LANE_Y so it clears the sun without arcing. The six
-// planets sit a fixed distance off to ALTERNATING sides (x = ±30), so the
-// straight lane sweeps past each one — never weaving, never turning to "visit"
-// it. Orientation is the path TANGENT (you always look where you're going), so
-// the view is as smooth as the path (which is a straight line → ~0°/s turning
-// in flight). While parked at a planet the look eases a few degrees toward it
-// (REGARD) for nicer framing, then releases. Verified offline: every body
-// clears by ≥4 units, surface gaps 28–33 (no ballooning), max angular velocity
-// ~5°/s anywhere (vs the old look-at "whip").
+// Designed for EPIC SCALE *AND* SMOOTHNESS. The camera parks close beside each
+// planet (park distance derived from its radius, so every world fills ~45% of
+// the screen height) and S-weaves gently across the lane between stops:
+// departure/approach control points are pulled toward the lane centre, so you
+// swing out of one planet's neighborhood, cruise the middle, and arc in beside
+// the next — banked turns, never a whip. Orientation is the path TANGENT (you
+// always look where you're going) eased a few degrees toward the planet while
+// parked (REGARD). Smoothness is GUARANTEED by two per-frame budgets in
+// CameraRig, not by the geometry: a world-speed cap (shaped by speedMultAt:
+// punch out, surge mid-leg, brake flare in) and a view-turn-rate cap
+// (MAX_TURN_RATE), so the ship slows through bends like a piloted craft.
+// Verified offline by scripts/verify-route.mjs: every body clears its keep-out
+// by ≥1.4 units, legs fly 3.6–5.9s, view turn ≤ ~29°/s everywhere.
 //
 // Progress (0..1) maps onto this curve via alternating DWELL windows (camera
-// parked, content panel visible) and TRAVEL windows (flying the lane).
+// parked, content panel visible) and TRAVEL windows (flying the route).
 import * as THREE from "three";
 import { PLANETS, SUN_RADIUS } from "../scene/planets.config";
 
 // ---- camera ----
 export const CAM_FOV = 58; // base field of view
-export const FOV_KICK = 6; // extra FOV at full warp (speed feel)
+export const FOV_KICK = 13; // extra FOV at full warp (speed feel)
 export const SCAN_MS = 1400; // planet-scan duration before the hologram materializes
 
-// ---- flight speed limit ----
-export const MAX_WORLD_SPEED = 30; // world units/sec — the ship's top speed
+// ---- flight limits ----
+export const MAX_WORLD_SPEED = 46; // world units/sec — base cap (speedMultAt shapes it per leg)
+export const MAX_TURN_RATE = (28 * Math.PI) / 180; // rad/s — view turn budget (no whip)
 export const SCROLL_RATE_BASE = 0.05; // max progress/sec when the gap is small
 export const SCROLL_RATE_GAIN = 0.15; // extra rate per unit of remaining gap
 
-// ---- lane geometry ----
+// ---- route geometry ----
 const LANE_Y = 6; // camera height = the planets' centre height, so each planet
 // sits at eye level (vertically centred) as you pass. The sun is still cleared
-// because the launch starts PAST it (z=-22) and the lane only heads further out.
-const DWELL_LEAD = 46; // park this far IN FRONT of a planet (Z), so it sits ahead-and-to-the-side
+// because the launch starts PAST it (z=-22) and the route only heads further out.
+const PARK_DIST = (r) => r * 3.2 + 8; // park this far in FRONT of a planet (Z)
+const PARK_SIDE = (r) => r * 1.75; // ...and this far toward the lane from its centre (X)
+const DEP_PULL = 0.4; // departure/approach control points pulled toward the lane centre
+const DEP_AHEAD = 40; // departure control point this far past the park (clamped to leg)
+const APP_AHEAD = 46; // approach control point this far before the next park (clamped)
 const LOOK_DIST = 60; // how far ahead the look target sits along the view direction
 const REGARD = 0.2; // how much the look eases toward a planet while parked (0..1)
 // gentle "piloting" weave — a slow side-to-side (and slight up/down) sway baked
@@ -73,9 +81,12 @@ function v3(x, y, z) {
 
 const LAST_Z = PLANETS[PLANETS.length - 1].position[2];
 
-// Every planet parks on the lane (x=0, y=LANE_Y), DWELL_LEAD in front of the
-// planet in Z. The planet itself is off to the side (±30) → framed to one side.
+// Every planet parks CLOSE BESIDE its world: PARK_DIST in front (Z) and
+// PARK_SIDE in from its centre toward the lane (X), both scaled by radius —
+// so big and small planets all fill ~45% of the screen height, framed to one
+// side (panel on the other).
 function planetStop(p) {
+  const sideSign = p.side === "left" ? -1 : 1;
   return {
     id: p.id,
     kind: "planet",
@@ -84,7 +95,11 @@ function planetStop(p) {
     accent: p.accent,
     side: p.side,
     dwell: PLANET_DWELL,
-    cam: v3(0, LANE_Y, p.position[2] + DWELL_LEAD),
+    cam: v3(
+      p.position[0] - sideSign * PARK_SIDE(p.radius),
+      LANE_Y,
+      p.position[2] + PARK_DIST(p.radius)
+    ),
   };
 }
 
@@ -158,18 +173,19 @@ export function phaseAt(t) {
 }
 
 /* ------------------------------------------------------------------ */
-/* The route — a straight lane (with a silent sun-clearance floor)     */
+/* The route — close parks joined by a gentle S-weave                  */
 /* ------------------------------------------------------------------ */
 
-const MIDS = 2;
-const ROUTE_MARGIN = 7;
+const ROUTE_MARGIN = 3;
 
-// keep-out spheres — MUST match CameraRig's BODIES. The lane stays far from the
-// planets, so clearPoint only ever nudges a waypoint off the SUN at the start
-// (and even that clears, so the lane stays straight).
+// keep-out spheres (camera must stay this far off a body's centre) — shared
+// with CameraRig's pushOut floor via keepFor.
+export const keepFor = (r) => r * 1.9 + 2.5;
+export const SUN_KEEP = SUN_RADIUS + 6;
+
 const CLEAR_BODIES = [
-  ...PLANETS.map((p) => ({ c: v3(...p.position), keep: p.radius * 3.5 + 4 })),
-  { c: v3(0, 0, 0), keep: SUN_RADIUS + 6 },
+  ...PLANETS.map((p) => ({ c: v3(...p.position), keep: keepFor(p.radius) })),
+  { c: v3(0, 0, 0), keep: SUN_KEEP },
 ];
 
 function clearPoint(m) {
@@ -182,20 +198,25 @@ function clearPoint(m) {
   return m;
 }
 
+// Control points per leg: park -> departure -> mid -> approach -> next park.
+// dep/app are pulled toward the lane centre (DEP_PULL) so the route swings out
+// of one planet's neighborhood and arcs in beside the next. Their forward
+// offsets are clamped to fractions of the leg so short legs (hero -> first
+// planet) can never produce out-of-order control points (a doubled-back curve
+// would mean a tangent flip = view whip).
 const ctrlPos = [];
-for (let i = 0; i < N; i++) {
-  ctrlPos.push(STOPS[i].cam);
-  if (i < N - 1) {
-    const a = STOPS[i].cam;
-    const b = STOPS[i + 1].cam;
-    for (let k = 1; k <= MIDS; k++) {
-      const t = k / (MIDS + 1);
-      const m = a.clone().lerp(b, t);
-      clearPoint(m);
-      ctrlPos.push(m);
-    }
-  }
+for (let i = 0; i < N - 1; i++) {
+  const a = STOPS[i].cam;
+  const b = STOPS[i + 1].cam;
+  const legDz = a.z - b.z; // always positive (the route heads -Z)
+  const depA = Math.min(DEP_AHEAD, legDz * 0.28);
+  const appA = Math.min(APP_AHEAD, legDz * 0.32);
+  const dep = clearPoint(v3(a.x * DEP_PULL, (a.y + LANE_Y) / 2, a.z - depA));
+  const app = clearPoint(v3(b.x * DEP_PULL, (b.y + LANE_Y) / 2, b.z + appA));
+  const mid = clearPoint(dep.clone().lerp(app, 0.5));
+  ctrlPos.push(a, dep, mid, app);
 }
+ctrlPos.push(STOPS[N - 1].cam);
 
 const posCurve = new THREE.CatmullRomCurve3(ctrlPos, false, "centripetal");
 
@@ -205,6 +226,26 @@ function easeInOutCubic(p) {
 function smooth01(x) {
   x = THREE.MathUtils.clamp(x, 0, 1);
   return x * x * (3 - 2 * x);
+}
+
+/* ------------------------------------------------------------------ */
+/* Speed profile — punch out, surge mid-leg, brake flare in            */
+/* ------------------------------------------------------------------ */
+
+// Multiplier on MAX_WORLD_SPEED by leg phase: gentle near both leg ends
+// (depart/arrive at ~30%), full speed by 18% in, and a +30% overspeed surge
+// through the middle. Symmetric, so flying backward feels the same.
+function speedProfile(p) {
+  const edge = Math.min(p, 1 - p); // 0 at both leg ends, 0.5 mid-leg
+  const ramp = 0.3 + 0.7 * smooth01(edge / 0.18);
+  const surge = 1 + 0.3 * smooth01((edge - 0.18) / 0.14);
+  return ramp * surge;
+}
+
+// world-speed multiplier at a raw scroll position (1x outside travel)
+export function speedMultAt(t) {
+  const ph = phaseAt(t);
+  return ph.phase === "travel" ? speedProfile(THREE.MathUtils.clamp(ph.p, 0, 1)) : speedProfile(0);
 }
 
 const _tan = new THREE.Vector3();
