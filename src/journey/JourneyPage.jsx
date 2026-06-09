@@ -29,7 +29,7 @@ const PLANET_STOPS = STOPS.filter((s) => s.kind === "planet");
 const LAST = STOPS.length - 1;
 const clampIdx = (i) => Math.max(0, Math.min(LAST, i));
 
-export default function JourneyPage({ onExitToSummary }) {
+export default function JourneyPage() {
   const quality = useMemo(() => detectQuality(), []);
   const progress = useMotionValue(0);
   const flightMV = useMotionValue(0);
@@ -247,7 +247,7 @@ export default function JourneyPage({ onExitToSummary }) {
       <SoundToggle />
 
       {/* boot terminal — covers the scene until "jack in" reveals space */}
-      {!live && <BootScreen onReveal={goLive} onSkip={onExitToSummary} />}
+      {!live && <BootScreen onReveal={goLive} />}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 // App.jsx — route between the scroll-driven space journey and the accessible
 // 2D summary. No WebGL or prefers-reduced-motion lands on the summary by
-// default (with an opt-in back to the journey where possible).
+// default (with an opt-in into the journey where possible). The journey itself
+// has no manual "back to summary" exit — the summary is purely the auto-fallback.
 import React, { useMemo, useState } from "react";
 import JourneyPage from "./journey/JourneyPage";
 import SummaryPage from "./pages/SummaryPage";
@@ -20,5 +21,5 @@ export default function App() {
     return <SummaryPage canFly={webgl} onEnterFlight={() => switchTo("journey")} />;
   }
 
-  return <JourneyPage onExitToSummary={() => switchTo("summary")} />;
+  return <JourneyPage />;
 }

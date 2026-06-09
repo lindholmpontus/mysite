@@ -12,7 +12,7 @@ import StarField from "./StarField";
 
 const ACCENT = "#c9d6e4"; // cool white-grey (monochrome space terminal)
 
-function Terminal({ onJackIn, onSkip }) {
+function Terminal({ onJackIn }) {
   return (
     <div
       className="crt-flicker relative h-full w-full flex flex-col font-mono"
@@ -26,18 +26,6 @@ function Terminal({ onJackIn, onSkip }) {
         style={{ background: "radial-gradient(ellipse at center, rgba(200,215,232,0.05), transparent 70%)" }}
       />
 
-      {/* early skip for recruiters, top-right */}
-      <Motion.button
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5, duration: 0.5 }}
-        onClick={onSkip}
-        className="relative self-end shrink-0 font-mono text-[9px] sm:text-[10px] tracking-[0.18em] uppercase pb-0.5 border-b border-transparent transition-colors duration-200 cursor-pointer hover:border-current"
-        style={{ color: "rgba(200,215,232,0.5)" }}
-      >
-        plain résumé →
-      </Motion.button>
-
       {/* the message — big, sparse, decrypting in (hacker decode). Click-through
           so it never intercepts the JACK IN button if the text overflows. */}
       <div className="pointer-events-none relative flex-1 flex flex-col items-center justify-center text-center gap-4 sm:gap-7 px-2">
@@ -48,7 +36,7 @@ function Terminal({ onJackIn, onSkip }) {
           Help…
         </h2>
         <p className="text-lg sm:text-3xl font-light text-white/90">
-          <ScrambleText text="An alien stole my résumé" delay={1100} perChar={26} />
+          <ScrambleText text="An alien stole my resumé" delay={1100} perChar={26} />
         </p>
         <p className="text-lg sm:text-3xl font-light text-white/90">
           <ScrambleText text="and scattered it across the solar system" delay={1900} perChar={22} />
@@ -73,14 +61,14 @@ function Terminal({ onJackIn, onSkip }) {
           style={{ border: `1px solid ${ACCENT}`, color: ACCENT, background: "rgba(200,215,232,0.08)", boxShadow: "0 0 20px rgba(200,215,232,0.28)" }}
         >
           <span className="inline-block mr-2 group-hover:translate-x-0.5 transition-transform">▶</span>
-          Jack in — begin recovery
+          begin recovery
         </button>
       </Motion.div>
     </div>
   );
 }
 
-export default function BootScreen({ onReveal, onSkip }) {
+export default function BootScreen({ onReveal }) {
   const [revealing, setRevealing] = useState(false);
 
   const jackIn = () => {
@@ -171,7 +159,7 @@ export default function BootScreen({ onReveal, onSkip }) {
             animate={{ opacity: revealing ? 0 : 1 }}
             transition={{ duration: 0.25 }}
           >
-            <Terminal onJackIn={jackIn} onSkip={onSkip} />
+            <Terminal onJackIn={jackIn} />
           </Motion.div>
         </Motion.div>
       </Motion.div>
