@@ -39,3 +39,6 @@ build/
 .idea/
 .DS_Store
 
+
+# Claude Code local tooling / skills
+.claude/

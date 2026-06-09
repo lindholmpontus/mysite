@@ -1,35 +1,24 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Portfolio from "./Portfolio";
-import Game from "./components/Game";
-import Hypnotized from "./components/Hypnotized";
-import Unemployedment from "./components/Unemployedment";
-import Hobbies from "./components/Hobbies"
-import GameAchievements from "./components/GameAchievements";
-import OsrsStats from "./components/OsrsStats";
-import LolStats from "./components/LolStats";
-import CS2Stats from "./components/CS2Stats";
+// App.jsx — route between the scroll-driven space journey and the accessible
+// 2D summary. No WebGL or prefers-reduced-motion lands on the summary by
+// default (with an opt-in back to the journey where possible).
+import React, { useMemo, useState } from "react";
+import JourneyPage from "./journey/JourneyPage";
+import SummaryPage from "./pages/SummaryPage";
+import { hasWebGL, prefersReducedMotion } from "./journey/journeyConfig";
 
+export default function App() {
+  const webgl = useMemo(() => hasWebGL(), []);
+  const reduced = useMemo(() => prefersReducedMotion(), []);
+  const [mode, setMode] = useState(() => (!webgl || reduced ? "summary" : "journey"));
 
+  const switchTo = (next) => {
+    window.scrollTo(0, 0);
+    setMode(next);
+  };
 
-function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Portfolio />} />
-        <Route path="/gaming" element={<Game />} />
-        <Route path="/hypnotize" element={<Hypnotized />} />
-        <Route path="/unemployedment" element={<Unemployedment />} />
-         <Route path="/hobbies" element={<Hobbies />} />
-         <Route path="/gaming/:gameId" element={<GameAchievements />} />
-         <Route path="/gaming/osrs" element={<OsrsStats />} />
-         <Route path="/gaming/lol" element={<LolStats />} />
-         <Route path="/gaming/cs2" element={<CS2Stats />} />
+  if (mode === "summary") {
+    return <SummaryPage canFly={webgl} onEnterFlight={() => switchTo("journey")} />;
+  }
 
-
-
-      </Routes>
-    </BrowserRouter>
-  );
+  return <JourneyPage onExitToSummary={() => switchTo("summary")} />;
 }
-
-export default App;
