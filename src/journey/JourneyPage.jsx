@@ -1,10 +1,11 @@
 // JourneyPage.jsx — the whole site as one scroll-driven space journey.
 //
-// Navigation is a DISCRETE STEPPER, not native scrolling: each wheel notch /
-// swipe / arrow key advances exactly one stop (with a cooldown), so scroll
-// momentum and buffered events can never carry you past a planet or skip its
-// panel. We own `progress` (0..1); the CameraRig damps + speed-caps toward it,
-// so a step still flies the ship smoothly to the next planet.
+// Navigation is a DISCRETE, ONE-WAY STEPPER, not native scrolling: each wheel
+// notch / swipe / arrow key advances exactly one stop FORWARD — scrolling back
+// does not reverse the ship — and only once you've parked (with a cooldown), so
+// scroll momentum and buffered events can never carry you past a planet or skip
+// its panel. We own `progress` (0..1); the CameraRig damps + speed-caps toward
+// it, so a step still flies the ship smoothly to the next planet.
 //
 // Two progress values:
 //   progress — the TARGET stop (where the finger pointed)
@@ -125,14 +126,12 @@ export default function JourneyPage() {
   useEffect(() => {
     const GAP = 160; // ms; a longer pause starts a new gesture
     const io = { lastWheel: 0, accum: 0, stepped: false, valid: false, touchY: 0, touchStepped: false, touchValid: false, lastKey: 0 };
-    // at the route's ends any gesture moves you away: scrolling UP at launch
-    // still launches, scrolling DOWN at deep space heads back
-    const step = (dir) => {
-      let next = targetRef.current + dir;
-      if (next < 0) next = 1;
-      else if (next > LAST) next = LAST - 1;
-      flyTo(next);
-    };
+    // ONE-WAY journey: every gesture advances exactly one stop, whichever way
+    // it points. Scrolling up (or swiping down, or ArrowUp) still moves you
+    // FORWARD — the ship never flies backwards. Revisiting a stop is done with
+    // the rail's fast-travel dots, which teleport instead of flying. At the
+    // final stop a gesture is a no-op (flyTo bails on a no-op target).
+    const step = () => flyTo(targetRef.current + 1);
     const panelScrolls = (target, dy) => {
       const el = target?.closest?.("[data-journey-scroll]");
       if (!el) return false;
@@ -157,7 +156,7 @@ export default function JourneyPage() {
       io.accum += e.deltaY;
       if (Math.abs(io.accum) >= 24) {
         io.stepped = true;
-        step(Math.sign(io.accum));
+        step();
       }
     };
     const onTouchStart = (e) => {
@@ -174,22 +173,22 @@ export default function JourneyPage() {
       if (!io.touchValid || io.touchStepped) return;
       if (Math.abs(dy) > 46) {
         io.touchStepped = true;
-        step(Math.sign(dy));
+        step();
       }
     };
     const onTouchEnd = () => {};
     const onKey = (e) => {
       if (!liveRef.current) return; // boot screen still up
-      const fwd = ["ArrowDown", "PageDown", " ", "Spacebar"].includes(e.key);
-      const back = ["ArrowUp", "PageUp"].includes(e.key);
-      if (!fwd && !back && e.key !== "Home" && e.key !== "End") return;
+      // both directions step FORWARD (see `step`); Home/End still teleport
+      const nav = ["ArrowDown", "PageDown", " ", "Spacebar", "ArrowUp", "PageUp"].includes(e.key);
+      if (!nav && e.key !== "Home" && e.key !== "End") return;
       e.preventDefault();
       if (e.key === "Home") return teleportTo(0);
       if (e.key === "End") return teleportTo(LAST);
       const now = performance.now();
       if (!arrivedRef.current || now - io.lastKey < 350) return; // key-repeat guard
       io.lastKey = now;
-      step(fwd ? 1 : -1);
+      step();
     };
 
     window.addEventListener("wheel", onWheel, { passive: false });

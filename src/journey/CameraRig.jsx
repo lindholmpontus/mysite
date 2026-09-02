@@ -93,7 +93,11 @@ export default function CameraRig({ progress, flightMV, speedMV, warpMV }) {
     const raw = progress.get();
     const gap = raw - s.t;
     const maxStep = (SCROLL_RATE_BASE + Math.abs(gap) * SCROLL_RATE_GAIN) * dt;
-    let step = THREE.MathUtils.clamp(gap * (1 - Math.exp(-3.4 * dt)), -maxStep, maxStep);
+    // clamped to >= 0: the journey is ONE-WAY, so the ship never flies
+    // backwards. Nothing asks for a lower progress (steps only advance, and
+    // rail clicks teleport via snapTo, handled above), so a negative gap can
+    // only be a transient — swallowing it guarantees no reverse travel.
+    let step = THREE.MathUtils.clamp(gap * (1 - Math.exp(-3.4 * dt)), 0, maxStep);
 
     // 2) flight budgets: shrink the step until BOTH fit —
     //    a) world-speed: path movement ≤ MAX_WORLD_SPEED shaped by the per-leg
