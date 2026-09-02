@@ -58,7 +58,7 @@ export const CAREER = [
     role: "Bachelor's Degree in Computer Science",
     org: "University of Gävle",
     place: "Gävle, Sweden",
-    period: "Graduated 2026",
+    period: "Graduated 2025",
     points: [
       "Thesis at Lantmäteriet: GraalVM Native Image vs JVM — performance & resource analysis.",
       "Courses in software development, databases, mathematics, and more.",
