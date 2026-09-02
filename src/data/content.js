@@ -50,7 +50,7 @@ export const CAREER = [
     period: "Mar 2026 – Present",
     points: [
       "Helping customers build data platforms, AI solutions and modern software applications",
-      "Joined through Sogeti's CareerBooster program (Mar – Sep 2026).",
+      "Joined through Sogeti's CareerBooster program.",
     ],
   },
   {
