@@ -62,7 +62,7 @@ export default function Planet({ planet, quality = "high" }) {
           center: planet.position,
           radius: planet.radius,
           top,
-          steps: quality === "high" ? 12 : 8,
+          steps: quality === "high" ? 12 : quality === "medium" ? 8 : 5,
         }),
       },
       ringInfo: ring,

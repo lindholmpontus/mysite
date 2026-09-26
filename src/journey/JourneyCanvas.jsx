@@ -14,7 +14,7 @@ import {
 import { ToneMappingMode } from "postprocessing";
 import * as THREE from "three";
 import JourneyWorld from "./JourneyWorld";
-import { CAM_FOV, journeyState } from "./journeyConfig";
+import { CAM_FOV, journeyState, isSoftwareRenderer } from "./journeyConfig";
 
 // The aberration effect keeps this exact Vector2 instance as its uniform, so
 // mutating it per frame drives the effect with no ref plumbing. Driven by the
@@ -41,7 +41,9 @@ function JourneyCanvasInner({
 }) {
   // 1.75 cap: indistinguishable from 2 on a moving scene, but meaningfully
   // cheaper on 4K displays — smoothness means never dropping below 60
-  const dpr = quality === "high" ? [1, 1.75] : [1, 1.5];
+  // software rendering: 0.75x resolution (~half the pixels) — softer, but
+  // it keeps the flight moving instead of a slideshow
+  const dpr = isSoftwareRenderer() ? 0.75 : quality === "high" ? [1, 1.75] : [1, 1.5];
 
   return (
     <Canvas

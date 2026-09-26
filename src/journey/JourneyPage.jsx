@@ -14,7 +14,15 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, useMotionValue, useMotionValueEvent } from "framer-motion";
 import JourneyCanvas from "./JourneyCanvas";
-import { STOPS, phaseAt, scrollTargetFor, requestSnap, detectQuality, SCAN_MS } from "./journeyConfig";
+import {
+  STOPS,
+  phaseAt,
+  scrollTargetFor,
+  requestSnap,
+  detectQuality,
+  isSoftwareRenderer,
+  SCAN_MS,
+} from "./journeyConfig";
 import Hero from "../ui/Hero";
 import StopPanel from "../ui/StopPanel";
 import PlanetReticle from "../ui/PlanetReticle";
@@ -22,6 +30,7 @@ import ProgressRail from "../ui/ProgressRail";
 import ScrollCue from "../ui/ScrollCue";
 import Outro from "../ui/Outro";
 import SoundToggle from "../ui/SoundToggle";
+import GpuHint from "../ui/GpuHint";
 import FragmentMeter from "../ui/FragmentMeter";
 import BootScreen from "../ui/BootScreen";
 import { playArrival, playDepart, playScan } from "../audio/spaceAudio";
@@ -43,6 +52,10 @@ export default function JourneyPage() {
   const [live, setLive] = useState(false);
   const liveRef = useRef(false);
   useEffect(predecodePanelImages, []);
+  // CPU-rendered WebGL: tell the CSS to drop per-frame compositor effects
+  useEffect(() => {
+    if (isSoftwareRenderer()) document.documentElement.dataset.softwareGl = "";
+  }, []);
   const goLive = () => {
     liveRef.current = true;
     setLive(true);
@@ -259,6 +272,7 @@ export default function JourneyPage() {
       <ProgressRail progress={flightMV} active={active} onJump={teleportTo} recovered={recovered} />
       <ScrollCue active={active} />
       <SoundToggle />
+      {live && <GpuHint />}
 
       {/* boot terminal — covers the scene until "jack in" reveals space */}
       {!live && <BootScreen onReveal={goLive} />}

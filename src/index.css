@@ -74,6 +74,22 @@ html {
   animation: holoFlicker 5s linear infinite;
 }
 
+/* WebGL on the CPU (browser hardware acceleration off): the page compositor
+   runs on the CPU too, and it has to redo these every frame over the moving
+   scene. Dropping them takes a parked planet view from ~16 to ~30 fps. */
+html[data-software-gl] * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html[data-software-gl] .hud-scanlines,
+html[data-software-gl] .hud-vignette,
+html[data-software-gl] .holo-lines {
+  display: none;
+}
+html[data-software-gl] .holo-flicker {
+  animation: none;
+}
+
 /* "signal intercepted" entrance glitch — corrupts then stabilises. */
 @keyframes heroGlitch {
   0% { opacity: 0; transform: translateX(-7px) skewX(6deg); text-shadow: 5px 0 #ff2d6e, -5px 0 #36e0ff; }
