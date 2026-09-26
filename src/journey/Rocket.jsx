@@ -67,16 +67,16 @@ export default function Rocket() {
       );
     }
 
-    // engine plume + glow scale with warp (plus a little idle flicker).
-    // Keep the stretch SHORT: the cone is base-anchored, so scale.y is the
-    // FULL tail length, and the camera sits only ~8.5 behind the ship at warp
-    // — a long tail reaches the view and blooms into a fat pillar (warp*3.0
-    // even swept past the camera as speed fluctuated)
+    // engine plumes stretch with warp (plus a little idle flicker; their glow
+    // is driven inside RocketModel). Keep the stretch SHORT: the cones are
+    // base-anchored, so scale.y is the FULL tail length, and the camera sits
+    // only ~8.5 behind the ship at warp — a long tail reaches the view and
+    // blooms into a fat pillar (warp*3.0 even swept past the camera as speed
+    // fluctuated)
     if (exhaustRef.current) {
       const flicker = Math.sin(t * 31) * 0.07 + Math.sin(t * 53) * 0.05;
       const target = 0.45 + warp * 1.1 + flicker * (0.3 + warp);
       exhaustRef.current.scale.y = THREE.MathUtils.lerp(exhaustRef.current.scale.y, target, dt * 10);
-      if (exhaustRef.current.material) exhaustRef.current.material.opacity = 0.22 + warp * 0.28;
     }
     if (lightRef.current) lightRef.current.intensity = 1 + warp * 3;
   }, -1);
