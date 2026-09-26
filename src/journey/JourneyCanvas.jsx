@@ -24,7 +24,7 @@ const CA_OFFSET = new THREE.Vector2(0, 0);
 
 function AberrationDriver() {
   useFrame(() => {
-    const o = journeyState.warp * journeyState.warp * 0.0016;
+    const o = journeyState.warp * journeyState.warp * 0.0007;
     CA_OFFSET.set(o, o * 0.5);
   });
   return null;

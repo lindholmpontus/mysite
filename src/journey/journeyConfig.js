@@ -5,14 +5,11 @@
 // the screen height) and S-weaves gently across the lane between stops:
 // departure/approach control points are pulled toward the lane centre, so you
 // swing out of one planet's neighborhood, cruise the middle, and arc in beside
-// the next — banked turns, never a whip. Orientation is the path TANGENT (you
-// always look where you're going) eased a few degrees toward the planet while
-// parked (REGARD). Smoothness is GUARANTEED by two per-frame budgets in
-// CameraRig, not by the geometry: a world-speed cap (shaped by speedMultAt:
-// punch out, surge mid-leg, brake flare in) and a view-turn-rate cap
-// (MAX_TURN_RATE), so the ship slows through bends like a piloted craft.
+// the next — banked turns, never a whip. Parked, the view is the path TANGENT
+// eased a few degrees toward the planet (REGARD). How each leg is FLOWN — a
+// timed S-curve along this route — lives in flight.js.
 // Verified offline by scripts/verify-route.mjs: every body clears its keep-out
-// by ≥1.4 units, legs fly 3.6–5.9s, view turn ≤ ~29°/s everywhere.
+// by ≥1.4 units.
 //
 // Progress (0..1) maps onto this curve via alternating DWELL windows (camera
 // parked, content panel visible) and TRAVEL windows (flying the route).
@@ -24,14 +21,8 @@ export const CAM_FOV = 58; // base field of view
 // portrait (phones): a taller view, so a parked planet fits whole in the band
 // above the info sheet instead of overflowing it
 export const CAM_FOV_PORTRAIT = 70;
-export const FOV_KICK = 13; // extra FOV at full warp (speed feel)
+export const FOV_KICK = 7; // extra FOV at cruise speed (speed feel, not a zoom lurch)
 export const SCAN_MS = 1400; // planet-scan duration before the hologram materializes
-
-// ---- flight limits ----
-export const MAX_WORLD_SPEED = 46; // world units/sec — base cap (speedMultAt shapes it per leg)
-export const MAX_TURN_RATE = (28 * Math.PI) / 180; // rad/s — view turn budget (no whip)
-export const SCROLL_RATE_BASE = 0.05; // max progress/sec when the gap is small
-export const SCROLL_RATE_GAIN = 0.15; // extra rate per unit of remaining gap
 
 // ---- route geometry ----
 const LANE_Y = 6; // camera height = the planets' centre height, so each planet
@@ -65,9 +56,13 @@ const TRAVEL = 6;
 
 // ---- shared per-frame state (mutated by CameraRig, read by scene FX) ----
 export const journeyState = {
-  speed: 0,
-  warp: 0,
-  bank: 0,
+  speed: 0, // world units / s
+  warp: 0, // 0..1: speed as a fraction of this leg's cruise speed
+  thrust: 0, // 0..1: forward acceleration (punch-out)
+  brake: 0, // 0..1: deceleration (retro burn)
+  accel: 0, // signed acceleration along the path, / the leg's peak
+  lateral: 0, // signed turn acceleration (camera-right +), / ~max
+  bank: 0, // camera roll (rad)
   u: 0,
   dir: new THREE.Vector3(0, 0, -1),
   snapTo: null,
@@ -225,6 +220,8 @@ for (let i = 0; i < N - 1; i++) {
 ctrlPos.push(STOPS[N - 1].cam);
 
 const posCurve = new THREE.CatmullRomCurve3(ctrlPos, false, "centripetal");
+// the whole route; stop i sits at u = i / (STOPS.length - 1)
+export const ROUTE = posCurve;
 
 function easeInOutCubic(p) {
   return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
@@ -232,26 +229,6 @@ function easeInOutCubic(p) {
 function smooth01(x) {
   x = THREE.MathUtils.clamp(x, 0, 1);
   return x * x * (3 - 2 * x);
-}
-
-/* ------------------------------------------------------------------ */
-/* Speed profile — punch out, surge mid-leg, brake flare in            */
-/* ------------------------------------------------------------------ */
-
-// Multiplier on MAX_WORLD_SPEED by leg phase: gentle near both leg ends
-// (depart/arrive at ~30%), full speed by 18% in, and a +30% overspeed surge
-// through the middle. Symmetric, so flying backward feels the same.
-function speedProfile(p) {
-  const edge = Math.min(p, 1 - p); // 0 at both leg ends, 0.5 mid-leg
-  const ramp = 0.3 + 0.7 * smooth01(edge / 0.18);
-  const surge = 1 + 0.3 * smooth01((edge - 0.18) / 0.14);
-  return ramp * surge;
-}
-
-// world-speed multiplier at a raw scroll position (1x outside travel)
-export function speedMultAt(t) {
-  const ph = phaseAt(t);
-  return ph.phase === "travel" ? speedProfile(THREE.MathUtils.clamp(ph.p, 0, 1)) : speedProfile(0);
 }
 
 const _tan = new THREE.Vector3();

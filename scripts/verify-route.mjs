@@ -2,9 +2,9 @@
 // layout math in src/journey/journeyConfig.js + src/scene/planets.config.js
 // (keep the constants in sync when tuning!). Reports, for the whole route:
 //   - min clearance from every body (camera path vs keep-out spheres)
-//   - max turn rate (deg/s) given the speed profile
+//   - per leg (the flight model in src/journey/flight.js): length, duration,
+//     cruise speed, peak acceleration and peak view-turn rate
 //   - parked framing per planet (apparent diameter as % of screen height)
-//   - leg flight times
 // Run: node scripts/verify-route.mjs
 import * as THREE from "three";
 
@@ -21,15 +21,13 @@ const PLANETS = [
 
 /* ---- mirrored from journeyConfig.js ---- */
 const CAM_FOV = 58;
-const MAX_WORLD_SPEED = 46;
 const LANE_Y = 6;
 const PARK_DIST = (r) => r * 3.2 + 8; // forward (z) gap from planet to park
 const PARK_SIDE = (r) => r * 1.75; // lateral offset, park sits toward the lane
 const keepFor = (r) => r * 1.9 + 2.5;
 const SUN_KEEP = SUN_RADIUS + 6;
 const ROUTE_MARGIN = 3;
-const SCROLL_RATE_BASE = 0.05, SCROLL_RATE_GAIN = 0.15;
-const MAX_TURN_RATE = (28 * Math.PI) / 180; // rad/s view-turn budget
+const REGARD = 0.2; // parked view eased this far toward the planet
 const WEAVE_X = 4, WEAVE_FX = 0.8, WEAVE_PX = 0.6;
 const WEAVE_Y = 2, WEAVE_FY = 0.6, WEAVE_PY = 2.0;
 const HERO_DWELL = 5, PLANET_DWELL = 8, OUTRO_DWELL = 7, TRAVEL = 6;
@@ -96,57 +94,73 @@ for (let i = 0; i < N - 1; i++) {
 ctrlPos.push(STOPS[N - 1].cam);
 const posCurve = new THREE.CatmullRomCurve3(ctrlPos, false, "centripetal");
 
-/* ---- speed profile (mirrored) ---- */
-const smooth01 = (x) => {
-  x = Math.min(1, Math.max(0, x));
-  return x * x * (3 - 2 * x);
+/* ---- flight model (mirrored from src/journey/flight.js) ---- */
+const FLIGHT = {
+  accelTime: 1.2, brakeTime: 1.5,
+  durBase: 2.25, durRate: 150, durMin: 3.0, durMax: 3.9,
+  lookAhead: 170,
 };
-function speedProfile(p) {
-  const edge = Math.min(p, 1 - p); // 0 at both leg ends, 0.5 mid-leg
-  const ramp = 0.3 + 0.7 * smooth01(edge / 0.18);
-  const surge = 1 + 0.3 * smooth01((edge - 0.18) / 0.14);
-  return ramp * surge;
-}
+const ss = (x) => { x = Math.min(1, Math.max(0, x)); return x * x * x * (x * (x * 6 - 15) + 10); };
+const ssD = (x) => 30 * x * x * (x - 1) * (x - 1);
+const ssI = (x) => x * x * x * x * (x * (x - 3) + 2.5);
 
-/* ---- scroll windows / sampling (mirrored from journeyConfig) ---- */
-const easeInOutCubic = (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
-const DWELLS = (() => {
-  const dwells = [HERO_DWELL, ...PLANETS.map(() => PLANET_DWELL), OUTRO_DWELL];
-  const totalW = dwells.reduce((s, d) => s + d, 0) + TRAVEL * (N - 1);
+function buildLeg(i) {
+  const u0 = i / (N - 1), u1 = (i + 1) / (N - 1);
+  const TABLE = 600, us = [], sd = [];
+  const a = posCurve.getPoint(u0), b = new THREE.Vector3();
   let acc = 0;
-  return dwells.map((d, i) => {
-    const t0 = acc / totalW;
-    acc += d;
-    const t1 = acc / totalW;
-    if (i < N - 1) acc += TRAVEL;
-    return { t0, t1 };
-  });
-})();
-const scrollTargetFor = (i) => (DWELLS[i].t0 + DWELLS[i].t1) / 2;
-function phaseAt(t) {
-  t = Math.min(1, Math.max(0, t));
-  for (let i = 0; i < N; i++) {
-    const d = DWELLS[i];
-    if (t < d.t0) {
-      const prev = DWELLS[i - 1];
-      return { index: i - 1, phase: "travel", p: (t - prev.t1) / (d.t0 - prev.t1) };
-    }
-    if (t <= d.t1) return { index: i, phase: "dwell", p: 0 };
+  for (let k = 0; k <= TABLE; k++) {
+    const u = u0 + (u1 - u0) * (k / TABLE);
+    posCurve.getPoint(u, b);
+    if (k > 0) acc += a.distanceTo(b);
+    us.push(u); sd.push(acc); a.copy(b);
   }
-  return { index: N - 1, phase: "dwell", p: 1 };
+  const duration = Math.min(FLIGHT.durMax, Math.max(FLIGHT.durMin, FLIGHT.durBase + acc / FLIGHT.durRate));
+  const cruise = acc / (duration - (FLIGHT.accelTime + FLIGHT.brakeTime) / 2);
+  const endTan = posCurve.getTangent(u1, new THREE.Vector3()).normalize();
+  return { i, u0, u1, us, sd, length: acc, duration, cruise, endTan };
 }
-function sampleU(t) {
-  const ph = phaseAt(t);
-  return ph.phase === "dwell"
-    ? ph.index / (N - 1)
-    : (ph.index + easeInOutCubic(Math.min(1, Math.max(0, ph.p)))) / (N - 1);
+function legPoint(leg, s, out) {
+  if (s >= leg.length) return posCurve.getPoint(leg.u1, out).addScaledVector(leg.endTan, s - leg.length);
+  let k = leg.sd.findIndex((d) => d > s);
+  if (k <= 0) k = 1;
+  const f = (s - leg.sd[k - 1]) / (leg.sd[k] - leg.sd[k - 1] || 1);
+  return posCurve.getPoint(leg.us[k - 1] + (leg.us[k] - leg.us[k - 1]) * f, out);
 }
-function samplePos(t, out) {
-  return posCurve.getPoint(sampleU(t), out);
+function legS(leg, tau) {
+  const ta = FLIGHT.accelTime, tb = FLIGHT.brakeTime, tc = leg.duration - ta - tb, V = leg.cruise;
+  if (tau <= 0) return 0;
+  if (tau < ta) return V * ta * ssI(tau / ta);
+  if (tau < ta + tc) return (V * ta) / 2 + V * (tau - ta);
+  if (tau < leg.duration) { const x = (tau - ta - tc) / tb; return (V * ta) / 2 + V * tc + V * tb * (x - ssI(x)); }
+  return leg.length;
 }
-function profileAt(t) {
-  const ph = phaseAt(t);
-  return ph.phase === "travel" ? speedProfile(ph.p) : speedProfile(0);
+// parked view direction: tangent eased toward the planet (plain tangent at
+// the launch / deep-space stops)
+function parkedDir(k) {
+  const u = k / (N - 1);
+  const p = posCurve.getPoint(u);
+  const d = posCurve.getTangent(u, new THREE.Vector3()).normalize();
+  if (STOPS[k].planet) d.lerp(v3(...STOPS[k].planet.position).sub(p).normalize(), REGARD).normalize();
+  return d;
+}
+function viewDir(leg, tau, out) {
+  const s = legS(leg, tau);
+  const p = legPoint(leg, s, new THREE.Vector3());
+  out.copy(legPoint(leg, s + FLIGHT.lookAhead, new THREE.Vector3())).sub(p).normalize();
+  const wDep = 1 - ss(tau / Math.min(leg.duration, FLIGHT.accelTime * 2.2));
+  const span = Math.min(leg.duration, FLIGHT.brakeTime * 2.0);
+  const wArr = ss((tau - (leg.duration - span)) / span);
+  return slerpDir(slerpDir(out, parkedDir(leg.i), wDep), parkedDir(leg.i + 1), wArr);
+}
+function slerpDir(a, b, t) {
+  if (t <= 0) return a;
+  if (t >= 1) return a.copy(b);
+  const cos = Math.min(1, Math.max(-1, a.dot(b)));
+  const theta = Math.acos(cos);
+  if (theta < 1e-4) return a;
+  const perp = b.clone().addScaledVector(a, -cos).normalize();
+  return a.multiplyScalar(Math.cos(theta * t)).addScaledVector(perp, Math.sin(theta * t));
 }
 
 /* ================== checks ================== */
@@ -163,63 +177,24 @@ for (let i = 0; i < pts.length; i++) {
   }
 }
 
-// 2) per-leg: replicate the ACTUAL CameraRig loop (exp damp + scroll-rate cap +
-// profiled world-speed budget) and measure flight time, peak speed, max view
-// turn rate (tangent angle change per second).
-console.log("leg timings, peak speed + max turn rate (CameraRig loop replica):");
-const _a = new THREE.Vector3(), _b = new THREE.Vector3();
-const tanPrev = new THREE.Vector3(), tanCur = new THREE.Vector3();
-for (let leg = 0; leg < N - 1; leg++) {
-  let st = scrollTargetFor(leg);
-  const target = scrollTargetFor(leg + 1);
-  const DT = 1 / 60;
-  let time = 0, turnMax = 0, turnAt = null, vMax = 0, guard = 0;
-  posCurve.getTangent(sampleU(st), tanPrev).normalize();
-  while (guard++ < 6000) {
-    const gap = target - st;
-    const maxStep = (SCROLL_RATE_BASE + Math.abs(gap) * SCROLL_RATE_GAIN) * DT;
-    let step = Math.min(maxStep, Math.max(-maxStep, gap * (1 - Math.exp(-3.4 * DT))));
-    let speedNow = 0;
-    if (step !== 0) {
-      const budget =
-        MAX_WORLD_SPEED * Math.min(profileAt(st), profileAt(st + step)) * DT;
-      samplePos(st, _a);
-      // iterative shrink: world-speed budget AND view-turn budget (curve speed
-      // and curvature both vary within a step, so refine a few times)
-      const turnBudget = MAX_TURN_RATE * DT;
-      const t0v = posCurve.getTangent(sampleU(st), new THREE.Vector3()).normalize();
-      const t1v = new THREE.Vector3();
-      for (let it = 0; it < 4; it++) {
-        samplePos(st + step, _b);
-        const move = _a.distanceTo(_b);
-        posCurve.getTangent(sampleU(st + step), t1v).normalize();
-        const turn = t0v.angleTo(t1v);
-        const over = Math.max(move / budget, turn / turnBudget);
-        if (over <= 1.001) break;
-        step /= over;
-      }
-      samplePos(st + step, _b);
-      speedNow = _a.distanceTo(_b) / DT;
-      vMax = Math.max(vMax, speedNow);
-    }
-    st += step;
-    posCurve.getTangent(sampleU(st), tanCur).normalize();
-    const turn = tanPrev.angleTo(tanCur) / DT;
-    if (turn > turnMax) {
-      turnMax = turn;
-      turnAt = { ph: phaseAt(st), speed: speedNow };
-    }
-    tanPrev.copy(tanCur);
-    time += DT;
-    // arrived: inside the next dwell and barely moving
-    if (phaseAt(st).index === leg + 1 && Math.abs(gap) < 0.002) break;
+// 2) per-leg flight (the analytic model): duration, cruise speed, peak
+// acceleration, peak view-turn rate
+console.log("legs (timed S-curve flights):");
+for (let i = 0; i < N - 1; i++) {
+  const leg = buildLeg(i);
+  const DT = 1 / 240;
+  const d0 = new THREE.Vector3(), d1 = new THREE.Vector3();
+  viewDir(leg, 0, d0);
+  let turnMax = 0;
+  for (let tau = DT; tau <= leg.duration; tau += DT) {
+    viewDir(leg, tau, d1);
+    turnMax = Math.max(turnMax, d0.angleTo(d1) / DT);
+    d0.copy(d1);
   }
-  const where = turnAt
-    ? `at ${turnAt.ph.phase} p=${(turnAt.ph.p ?? 0).toFixed(2)} v=${turnAt.speed.toFixed(0)}`
-    : "";
+  const accelPeak = (leg.cruise * 1.875) / FLIGHT.accelTime;
   console.log(
-    `  ${STOPS[leg].id.padEnd(8)} -> ${STOPS[leg + 1].id.padEnd(8)}  ${time.toFixed(1)}s` +
-      `  peak ${vMax.toFixed(0)} u/s  maxTurn ${((turnMax * 180) / Math.PI).toFixed(1)} deg/s (${where})`
+    `  ${STOPS[i].id.padEnd(8)} -> ${STOPS[i + 1].id.padEnd(8)}  ${leg.length.toFixed(0).padStart(4)} u in ${leg.duration.toFixed(2)}s` +
+      `  cruise ${leg.cruise.toFixed(0)} u/s  peak accel ${accelPeak.toFixed(0)} u/s²  max view turn ${((turnMax * 180) / Math.PI).toFixed(1)} deg/s`
   );
 }
 

@@ -3,15 +3,19 @@
 // straight to the stop — only scrolling flies the route).
 import React from "react";
 import { motion as Motion, useTransform } from "framer-motion";
-import { STOPS, scrollTargetFor } from "../journey/journeyConfig";
+import { STOPS, DWELLS } from "../journey/journeyConfig";
 
 export default function ProgressRail({ progress, active, onJump, recovered }) {
   const n = STOPS.length;
-  // map scroll to fraction-of-route so the fill line hits each dot exactly
-  // while that stop is active
-  const centers = STOPS.map((_, i) => scrollTargetFor(i));
-  const fractions = STOPS.map((_, i) => i / (n - 1));
-  const fill = useTransform(progress, centers, fractions);
+  // map the ship's progress to fraction-of-route: flat on a stop's dot for its
+  // whole dwell window, linear across each travel window
+  const input = [];
+  const output = [];
+  DWELLS.forEach((d, i) => {
+    input.push(d.t0, d.t1);
+    output.push(i / (n - 1), i / (n - 1));
+  });
+  const fill = useTransform(progress, input, output);
 
   // clicks teleport (handled by the parent) — only scrolling flies the route
   const jumpTo = (i) => onJump?.(i);

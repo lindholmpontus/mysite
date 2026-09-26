@@ -7,9 +7,12 @@ import { motion as Motion, useTransform } from "framer-motion";
 import { DWELLS } from "../journey/journeyConfig";
 
 export default function Hero({ progress }) {
-  const heroEnd = DWELLS[0].t1;
-  const opacity = useTransform(progress, [heroEnd * 0.3, heroEnd], [1, 0]);
-  const y = useTransform(progress, [0, heroEnd], [0, -40]);
+  // parked at launch the ship's progress reads 0; the moment you launch it
+  // jumps into the first travel window — fade out over the first third of it
+  const leave = DWELLS[0].t1;
+  const gone = leave + (DWELLS[1].t0 - leave) * 0.35;
+  const opacity = useTransform(progress, [leave, gone], [1, 0]);
+  const y = useTransform(progress, [leave, gone], [0, -40]);
 
   return (
     <Motion.div
