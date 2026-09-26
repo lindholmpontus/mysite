@@ -83,9 +83,9 @@ export default function Outro({ progress, onReturn }) {
             >
               ↑ Return to launch
             </button>
-            {/* end credits — the planet maps are CC BY 4.0 and need attribution */}
+            {/* end credits — the planet + Milky Way maps are CC BY 4.0 and need attribution */}
             <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-white/25 mt-6">
-              Planet textures:{" "}
+              Planet & sky textures:{" "}
               <a
                 href="https://www.solarsystemscope.com/textures/"
                 target="_blank"

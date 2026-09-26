@@ -46,6 +46,7 @@ export default function JourneyWorld({
           outerRadius={140}
           ySpread={20}
           count={quality === "medium" ? 110 : 190}
+          detail={quality === "medium" ? 2 : 3}
         />
       )}
 
