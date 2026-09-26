@@ -23,13 +23,14 @@ export default function ProgressRail({ progress, active, onJump, recovered }) {
   return (
     <nav
       aria-label="Fast travel to a stop"
-      className="fixed right-2 sm:right-6 top-20 sm:top-1/2 sm:-translate-y-1/2 z-40 flex flex-col items-center"
+      className="fixed right-1.5 sm:right-6 top-24 sm:top-1/2 sm:-translate-y-1/2 z-40 flex flex-col items-center"
     >
-      {/* header so it's clear the dots are clickable shortcuts */}
-      <p className="font-mono text-[8px] sm:text-[10px] tracking-[0.28em] uppercase text-white/55 text-center mb-2 sm:mb-3 whitespace-nowrap pointer-events-none">
+      {/* header so it's clear the dots are clickable shortcuts (desktop only: on
+          a phone it collides with the planet's lock-on label up top) */}
+      <p className="hidden sm:block font-mono text-[10px] tracking-[0.28em] uppercase text-white/55 text-center mb-3 whitespace-nowrap pointer-events-none">
         ▸ Fast travel
       </p>
-      <div className="relative flex flex-col items-center justify-between h-[32vh] sm:h-[44vh] min-h-[210px] sm:min-h-[270px] py-1">
+      <div className="relative flex flex-col items-center justify-between h-[26vh] sm:h-[44vh] min-h-[180px] sm:min-h-[270px] py-1">
         {/* track + fill */}
         <span aria-hidden="true" className="absolute inset-y-2 w-px bg-white/15" />
         <Motion.span

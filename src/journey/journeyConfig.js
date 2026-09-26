@@ -21,6 +21,9 @@ import { PLANETS, SUN_RADIUS } from "../scene/planets.config";
 
 // ---- camera ----
 export const CAM_FOV = 58; // base field of view
+// portrait (phones): a taller view, so a parked planet fits whole in the band
+// above the info sheet instead of overflowing it
+export const CAM_FOV_PORTRAIT = 70;
 export const FOV_KICK = 13; // extra FOV at full warp (speed feel)
 export const SCAN_MS = 1400; // planet-scan duration before the hologram materializes
 
@@ -41,6 +44,9 @@ const DEP_AHEAD = 40; // departure control point this far past the park (clamped
 const APP_AHEAD = 46; // approach control point this far before the next park (clamped)
 const LOOK_DIST = 60; // how far ahead the look target sits along the view direction
 const REGARD = 0.2; // how much the look eases toward a planet while parked (0..1)
+// portrait: the narrow view can't hold a planet 25-30° off-axis, so turn
+// (almost) fully toward it while parked — centred above the info sheet
+export const REGARD_PORTRAIT = 0.92;
 // gentle "piloting" weave — a slow side-to-side (and slight up/down) sway baked
 // into the lane so the camera banks through soft turns instead of flying
 // ruler-straight. Low amplitude + low frequency keeps the turn-rate ~13°/s.
@@ -253,9 +259,10 @@ const _toP = new THREE.Vector3();
 const RAMP_U = 0.45 / (N - 1); // how far into a leg the regard-bias releases
 
 // Map raw scroll (0..1) to camera pose. Orientation = path tangent (look where
-// you're going), eased a few degrees toward the planet while parked. Writes
-// into outPos/outTarget; returns phase info ({ index, phase, p, u }).
-export function sampleJourney(t, outPos, outTarget) {
+// you're going), eased toward the planet while parked by `regard` (a few
+// degrees on wide screens; see REGARD_PORTRAIT). Writes into outPos/outTarget;
+// returns phase info ({ index, phase, p, u }).
+export function sampleJourney(t, outPos, outTarget, regard = REGARD) {
   const ph = phaseAt(t);
   const u =
     ph.phase === "dwell"
@@ -273,7 +280,7 @@ export function sampleJourney(t, outPos, outTarget) {
     const ease = smooth01((RAMP_U - du) / RAMP_U);
     if (ease > 0) {
       _toP.copy(center).sub(outPos).normalize();
-      _tan.lerp(_toP, REGARD * ease).normalize();
+      _tan.lerp(_toP, regard * ease).normalize();
     }
   }
 

@@ -20,6 +20,8 @@ import {
   SUN_KEEP,
   speedMultAt,
   CAM_FOV,
+  CAM_FOV_PORTRAIT,
+  REGARD_PORTRAIT,
   FOV_KICK,
   MAX_WORLD_SPEED,
   MAX_TURN_RATE,
@@ -81,6 +83,8 @@ export default function CameraRig({ progress, flightMV, speedMV, warpMV }) {
     // floor keeps the budget math finite (step /= over) on a zero-delta frame
     const dt = THREE.MathUtils.clamp(delta, 1e-4, 1 / 30);
     const s = sm.current;
+    const portrait = camera.aspect < 0.85;
+    const regard = portrait ? REGARD_PORTRAIT : undefined;
 
     // 0) teleport request (progress-rail click): snap, re-seed, zero velocity
     if (journeyState.snapTo !== null) {
@@ -111,10 +115,10 @@ export default function CameraRig({ progress, flightMV, speedMV, warpMV }) {
       const budget =
         MAX_WORLD_SPEED * Math.min(speedMultAt(s.t), speedMultAt(s.t + step)) * dt;
       const turnBudget = MAX_TURN_RATE * dt;
-      sampleJourney(s.t, _pathA, _tgtTmp);
+      sampleJourney(s.t, _pathA, _tgtTmp, regard);
       _dirA.copy(_tgtTmp).sub(_pathA).normalize();
       for (let it = 0; it < 4; it++) {
-        sampleJourney(s.t + step, _pathB, _tgtTmp);
+        sampleJourney(s.t + step, _pathB, _tgtTmp, regard);
         const move = _pathA.distanceTo(_pathB);
         _dirB.copy(_tgtTmp).sub(_pathB).normalize();
         const turn = _dirA.angleTo(_dirB);
@@ -125,7 +129,7 @@ export default function CameraRig({ progress, flightMV, speedMV, warpMV }) {
     }
     s.t += step;
 
-    const ph = sampleJourney(s.t, _pos, _tgt);
+    const ph = sampleJourney(s.t, _pos, _tgt, regard);
 
     // 3) idle drift while parked, so orbit shots feel alive (fades out at speed)
     const time = r3f.clock.elapsedTime;
@@ -169,7 +173,7 @@ export default function CameraRig({ progress, flightMV, speedMV, warpMV }) {
     camera.up.set(0, 1, 0);
     // portrait (mobile): aim below the focus so the planet rides up into the
     // top half of the screen, leaving the bottom half for the info sheet
-    if (camera.aspect < 0.85) {
+    if (portrait) {
       _lookT.copy(s.tgt);
       _lookT.y -= 0.34 * camera.position.distanceTo(s.tgt);
       camera.lookAt(_lookT);
@@ -186,7 +190,7 @@ export default function CameraRig({ progress, flightMV, speedMV, warpMV }) {
     camera.rotateZ(s.roll + rollJitter);
 
     // 6) FOV widens with speed — normalized to the world-speed cap
-    const fovTarget = CAM_FOV + FOV_KICK * warp;
+    const fovTarget = (portrait ? CAM_FOV_PORTRAIT : CAM_FOV) + FOV_KICK * warp;
     s.fov += (fovTarget - s.fov) * (1 - Math.exp(-4 * dt));
     if (Math.abs(camera.fov - s.fov) > 0.01) {
       camera.fov = s.fov;

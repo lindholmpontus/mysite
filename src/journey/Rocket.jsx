@@ -30,11 +30,11 @@ export default function Rocket() {
 
     // anchor: ahead of and slightly below the camera, with a gentle idle bob.
     // On portrait (mobile) the camera aims low to lift the planet up, so the
-    // ship rides near screen-center in the top half (above the info sheet);
-    // warp pulls it closer so the FOV kick doesn't shrink it.
+    // ship rides in the top half, clear of the info sheet's top edge (~44%
+    // down); warp pulls it closer so the FOV kick doesn't shrink it.
     const portrait = camera.aspect < 0.85;
     const dist = (portrait ? 14 : 11) - warp * 2.5;
-    const drop = (portrait ? -0.6 : 2.4) + warp * 0.3;
+    const drop = (portrait ? -1.9 : 2.4) + warp * 0.3;
     _fwd.set(0, 0, -1).applyQuaternion(camera.quaternion);
     _up.set(0, 1, 0).applyQuaternion(camera.quaternion);
     g.position
