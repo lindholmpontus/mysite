@@ -8,10 +8,15 @@ import { DWELLS, STOPS } from "../journey/journeyConfig";
 import { PLANETS } from "../scene/planets.config";
 import { SECTIONS } from "../sections/sections";
 
-const gridV = { hidden: {}, show: { transition: { staggerChildren: 0.08, delayChildren: 0.15 } } };
+// each card materializes in reading order (custom = its index), whichever
+// column it sits in
 const cardV = {
   hidden: { opacity: 0, y: 26 },
-  show: { opacity: [0, 1, 0.6, 1], y: 0, transition: { duration: 0.55, times: [0, 0.5, 0.65, 1] } },
+  show: (i) => ({
+    opacity: [0, 1, 0.6, 1],
+    y: 0,
+    transition: { duration: 0.55, times: [0, 0.5, 0.65, 1], delay: 0.15 + i * 0.08 },
+  }),
 };
 
 export default function Outro({ progress, onReturn }) {
@@ -50,46 +55,24 @@ export default function Outro({ progress, onReturn }) {
             </p>
           </header>
 
-          {/* every fragment at once — a masonry of recovered dossiers */}
+          {/* every fragment at once — a masonry of recovered dossiers. Two
+              independent columns (even fragments left, odd right) so a tall
+              card never pushes its row-mate's successor down: in a plain 2-col
+              grid, rows align, and Contact sat far below Skills because
+              Projects is so much taller. On narrow screens the column wrappers
+              dissolve (display: contents) into one column in reading order. */}
           <Motion.div
-            variants={gridV}
             initial="hidden"
             animate={arrived ? "show" : "hidden"}
             className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 items-start"
           >
-            {PLANETS.map((planet, i) => {
-              const { title, Component } = SECTIONS[planet.section];
-              const accent = planet.accent;
-              return (
-                <Motion.div
-                  key={planet.id}
-                  variants={cardV}
-                  className="relative rounded-2xl border bg-[#050810]/85 backdrop-blur-xl overflow-hidden"
-                  style={{ borderColor: `${accent}55`, boxShadow: `0 0 40px ${accent}1f` }}
-                >
-                  <span aria-hidden="true" className="holo-lines pointer-events-none absolute inset-0 opacity-40" />
-                  <span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-y-0 left-0 w-px"
-                    style={{ background: accent, boxShadow: `0 0 12px ${accent}` }}
-                  />
-                  <header className="relative px-5 pt-4 pb-3 border-b" style={{ borderColor: `${accent}26` }}>
-                    <p
-                      className="font-mono text-[9px] tracking-[0.3em] uppercase"
-                      style={{ color: accent, textShadow: `0 0 10px ${accent}` }}
-                    >
-                      ◈ Fragment {String(i + 1).padStart(2, "0")} / 06
-                    </p>
-                    <h3 className="font-display uppercase text-base sm:text-lg tracking-[0.12em] mt-1.5 text-white">
-                      {title}
-                    </h3>
-                  </header>
-                  <div className="relative px-5 py-5">
-                    <Component accent={accent} />
-                  </div>
-                </Motion.div>
-              );
-            })}
+            {[0, 1].map((col) => (
+              <div key={col} className="contents lg:flex lg:flex-col lg:gap-5">
+                {PLANETS.map((planet, i) => i % 2 === col && (
+                  <FragmentCard key={planet.id} planet={planet} index={i} />
+                ))}
+              </div>
+            ))}
           </Motion.div>
 
           {/* back to the start */}
@@ -100,8 +83,67 @@ export default function Outro({ progress, onReturn }) {
             >
               ↑ Return to launch
             </button>
+            {/* end credits — the planet maps are CC BY 4.0 and need attribution */}
+            <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-white/25 mt-6">
+              Planet textures:{" "}
+              <a
+                href="https://www.solarsystemscope.com/textures/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline decoration-white/20 hover:text-white/60 transition-colors"
+              >
+                Solar System Scope
+              </a>{" "}
+              (based on NASA imagery) ·{" "}
+              <a
+                href="https://creativecommons.org/licenses/by/4.0/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline decoration-white/20 hover:text-white/60 transition-colors"
+              >
+                CC BY 4.0
+              </a>{" "}
+              · modified
+            </p>
           </div>
         </div>
+      </div>
+    </Motion.div>
+  );
+}
+
+// one recovered fragment: a section's content framed in its planet's accent.
+// `order` only matters on narrow screens, where the column wrappers dissolve
+// and every card is a direct item of the one-column grid.
+function FragmentCard({ planet, index }) {
+  const { title, Component } = SECTIONS[planet.section];
+  const accent = planet.accent;
+  return (
+    <Motion.div
+      custom={index}
+      variants={cardV}
+      className="relative rounded-2xl border bg-[#050810]/85 backdrop-blur-xl overflow-hidden"
+      style={{ order: index, borderColor: `${accent}55`, boxShadow: `0 0 40px ${accent}1f` }}
+    >
+      <span aria-hidden="true" className="holo-lines pointer-events-none absolute inset-0 opacity-40" />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 left-0 w-px"
+        style={{ background: accent, boxShadow: `0 0 12px ${accent}` }}
+      />
+      <header className="relative px-5 pt-4 pb-3 border-b" style={{ borderColor: `${accent}26` }}>
+        <p
+          className="font-mono text-[9px] tracking-[0.3em] uppercase"
+          style={{ color: accent, textShadow: `0 0 10px ${accent}` }}
+        >
+          ◈ Fragment {String(index + 1).padStart(2, "0")} / 06
+        </p>
+        <h3 className="font-display uppercase text-base sm:text-lg tracking-[0.12em] mt-1.5 text-white">
+          {title}
+        </h3>
+      </header>
+      <div className="relative px-5 py-5">
+        <Component accent={accent} />
       </div>
     </Motion.div>
   );
