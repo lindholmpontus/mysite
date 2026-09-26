@@ -186,6 +186,7 @@ const uvVertex = /* glsl */ `
 export default function RocketModel({ exhaustRef, lightRef }) {
   const gl = useThree((s) => s.gl);
   const strobeRef = useRef();
+  const retroRefs = useRef([]);
 
   const kit = useMemo(() => {
     const env = buildEnvMap(gl);
@@ -201,6 +202,7 @@ export default function RocketModel({ exhaustRef, lightRef }) {
         fin: finGeometry(),
         plume: plumeGeometry(0.14), // narrower than the nozzle: the dark rim shows
         core: plumeGeometry(0.055),
+        retro: plumeGeometry(0.06),
       },
       mat: {
         hull: new THREE.MeshStandardMaterial({ color: "#d3dae5", metalness: 0.6, roughness: 0.3, flatShading: true, envMap: env }),
@@ -224,6 +226,11 @@ export default function RocketModel({ exhaustRef, lightRef }) {
           vertexShader: uvVertex, fragmentShader: nozzleFragment, toneMapped: false,
         }),
         halo: new THREE.SpriteMaterial({ map: glow, color: new THREE.Color(BURN).multiplyScalar(1.3), ...additive }),
+        retro: new THREE.ShaderMaterial({
+          uniforms: { uColor: { value: new THREE.Color("#bcd4ff") }, uIntensity: { value: 0 }, uTime: { value: 0 } },
+          vertexShader: plumeVertex, fragmentShader: plumeFragment, side: THREE.DoubleSide, ...additive,
+        }),
+        retroHalo: new THREE.SpriteMaterial({ map: glow, color: new THREE.Color("#9fc0ff").multiplyScalar(1.4), ...additive }),
         port: new THREE.MeshBasicMaterial({ color: new THREE.Color("#ff3b3b").multiplyScalar(3), toneMapped: false }),
         starboard: new THREE.MeshBasicMaterial({ color: new THREE.Color("#3bff7a").multiplyScalar(3), toneMapped: false }),
         strobe: new THREE.MeshBasicMaterial({ color: new THREE.Color("#ffffff").multiplyScalar(6), toneMapped: false }),
@@ -243,14 +250,25 @@ export default function RocketModel({ exhaustRef, lightRef }) {
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
-    const warp = journeyState.warp;
+    const { warp, thrust, brake } = journeyState;
     const flicker = 1 + Math.sin(t * 31) * 0.05 + Math.sin(t * 53) * 0.04;
-    const { plume, core, nozzleGlow, halo } = kit.mat;
-    plume.uniforms.uIntensity.value = (0.4 + warp * 1.2) * flicker;
-    core.uniforms.uIntensity.value = (0.25 + warp * 1.3) * flicker;
-    plume.uniforms.uTime.value = core.uniforms.uTime.value = t;
-    nozzleGlow.uniforms.uIntensity.value = (1.3 + warp * 1.7) * flicker;
-    halo.opacity = 0.5 + warp * 0.4;
+    const { plume, core, nozzleGlow, halo, retro, retroHalo } = kit.mat;
+    // main engines: flare on the punch-out, throttle back while braking
+    const burn = Math.max(0, warp + thrust * 0.7 - brake * 0.35);
+    plume.uniforms.uIntensity.value = (0.4 + burn * 1.2) * flicker;
+    core.uniforms.uIntensity.value = (0.25 + burn * 1.3) * flicker;
+    plume.uniforms.uTime.value = core.uniforms.uTime.value = retro.uniforms.uTime.value = t;
+    nozzleGlow.uniforms.uIntensity.value = (1.3 + burn * 1.7) * flicker;
+    halo.opacity = 0.5 + Math.min(burn, 1.3) * 0.4;
+    // retro thrusters: fire forward while the ship brakes into a stop
+    const retroOn = brake > 0.02;
+    for (const g of retroRefs.current) {
+      if (!g) continue;
+      g.visible = retroOn;
+      g.scale.set(1, 0.2 + brake * 0.5, 1);
+    }
+    retro.uniforms.uIntensity.value = brake * 2.6 * flicker;
+    retroHalo.opacity = Math.min(1, brake * 1.1);
     // anti-collision strobe: a double flash every 1.4 s
     if (strobeRef.current) {
       const c = t % 1.4;
@@ -324,6 +342,16 @@ export default function RocketModel({ exhaustRef, lightRef }) {
           </group>
         ))}
       </group>
+
+      {/* retro thrusters on the nose flanks — plumes point FORWARD (-Z) */}
+      {[1, -1].map((side, i) => (
+        <group key={side} position={[0.37 * side, -0.02, -1.2]}>
+          <group ref={(g) => (retroRefs.current[i] = g)} rotation={[-Math.PI / 2, 0, 0]} visible={false}>
+            <mesh geometry={geo.retro} material={mat.retro} />
+          </group>
+          <sprite scale={0.55} material={mat.retroHalo} />
+        </group>
+      ))}
 
       {/* engine glow light */}
       <pointLight ref={lightRef} position={[0, 0.1, 2.9]} color={BURN} intensity={1.2} distance={10} decay={2} />

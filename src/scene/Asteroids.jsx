@@ -88,7 +88,7 @@ export default function Asteroids({
     for (let i = 0; i < count; i++) {
       const angle = rand() * Math.PI * 2;
       const radius = innerRadius + rand() * (outerRadius - innerRadius);
-      const size = 0.25 + Math.pow(rand(), 2) * 1.3; // many small, a few big
+      const size = 0.25 + Math.pow(rand(), 2) * 1.0; // many small, a few big
       // dark: real asteroids reflect ~5-25% of light — carbonaceous
       // grey-black to dusty grey-brown stony rock
       tint.setHSL(0.07 + rand() * 0.04, 0.05 + rand() * 0.1, 0.11 + rand() * 0.11);

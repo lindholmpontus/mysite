@@ -122,7 +122,10 @@ function FragmentCard({ planet, index }) {
     <Motion.div
       custom={index}
       variants={cardV}
-      className="relative rounded-2xl border bg-[#050810]/85 backdrop-blur-xl overflow-hidden"
+      // no backdrop blur: the cards sit on the outro's ~90% black overlay, so it
+      // blurred nothing visible — but six of them cost a real hitch to raster
+      // as the dossier faded in at the end of the last flight
+      className="relative rounded-2xl border bg-[#050810]/85 overflow-hidden"
       style={{ order: index, borderColor: `${accent}55`, boxShadow: `0 0 40px ${accent}1f` }}
     >
       <span aria-hidden="true" className="holo-lines pointer-events-none absolute inset-0 opacity-40" />

@@ -11,6 +11,7 @@ import RocketModel from "./RocketModel";
 
 const _fwd = new THREE.Vector3();
 const _up = new THREE.Vector3();
+const _right = new THREE.Vector3();
 
 export default function Rocket() {
   const { camera } = useThree();
@@ -26,21 +27,27 @@ export default function Rocket() {
     if (!g) return;
     const dt = Math.min(delta, 1 / 30);
     const t = r3f.clock.elapsedTime;
-    const warp = journeyState.warp;
+    const { warp, thrust, brake, accel, lateral } = journeyState;
 
     // anchor: ahead of and slightly below the camera, with a gentle idle bob.
     // On portrait (mobile) the camera aims low to lift the planet up, so the
     // ship rides in the top half, clear of the info sheet's top edge (~44%
     // down); warp pulls it closer so the FOV kick doesn't shrink it.
+    // Subtle chase-cam life on top (from the flight's analytic acceleration,
+    // so it's as smooth as the flight): the ship eases a little ahead as it
+    // pushes off and settles back while braking, and drifts a touch into each
+    // turn. Kept small — the ship should feel steady, not thrown around.
     const portrait = camera.aspect < 0.85;
-    const dist = (portrait ? 14 : 11) - warp * 2.5;
+    const dist = (portrait ? 14 : 11) - warp * 1.4 + accel * 0.45;
     const drop = (portrait ? -1.9 : 2.4) + warp * 0.3;
     _fwd.set(0, 0, -1).applyQuaternion(camera.quaternion);
     _up.set(0, 1, 0).applyQuaternion(camera.quaternion);
+    _right.set(1, 0, 0).applyQuaternion(camera.quaternion);
     g.position
       .copy(camera.position)
       .addScaledVector(_fwd, dist)
-      .addScaledVector(_up, -drop + Math.sin(t * 1.3) * 0.12);
+      .addScaledVector(_up, -drop + Math.sin(t * 1.3) * 0.12)
+      .addScaledVector(_right, lateral * 0.2);
 
     // ALWAYS match the camera's orientation, so the nose points into the
     // screen (-Z) and the engine plume always trails toward the camera. This
@@ -48,15 +55,15 @@ export default function Rocket() {
     // flipped the ship 180° whenever you scrolled backward.
     g.quaternion.slerp(camera.quaternion, 1 - Math.exp(-6 * dt));
 
-    // cosmetic banking, mirroring the camera roll, plus a slight nose-up while
-    // climbing so it reads like a piloted craft (purely from the model layer)
+    // attitude (model layer only): banks harder than the camera, yaws its
+    // nose into the turn, lifts the nose under thrust and dips it braking
     if (modelRef.current) {
-      const targetRoll = THREE.MathUtils.clamp(journeyState.bank * 2.4, -0.5, 0.5);
-      modelRef.current.rotation.z = THREE.MathUtils.lerp(
-        modelRef.current.rotation.z,
-        targetRoll,
-        dt * 6
-      );
+      const m = modelRef.current;
+      const k = 1 - Math.exp(-3 * dt);
+      const targetRoll = THREE.MathUtils.clamp(journeyState.bank * 2.2, -0.18, 0.18);
+      m.rotation.z += (targetRoll - m.rotation.z) * k;
+      m.rotation.y += (-lateral * 0.035 - m.rotation.y) * k;
+      m.rotation.x += (thrust * 0.02 - brake * 0.015 - m.rotation.x) * k;
       // ship reads slightly smaller (planets feel bigger by contrast) and
       // stretches along its axis at warp — the classic lightspeed cue
       const sBase = 0.85;
@@ -75,7 +82,8 @@ export default function Rocket() {
     // fluctuated)
     if (exhaustRef.current) {
       const flicker = Math.sin(t * 31) * 0.07 + Math.sin(t * 53) * 0.05;
-      const target = 0.45 + warp * 1.1 + flicker * (0.3 + warp);
+      // flares on the punch-out, throttles back while the retros brake
+      const target = 0.45 + warp * 1.1 + thrust * 0.4 - brake * 0.3 + flicker * (0.12 + 0.3 * warp);
       exhaustRef.current.scale.y = THREE.MathUtils.lerp(exhaustRef.current.scale.y, target, dt * 10);
     }
     if (lightRef.current) lightRef.current.intensity = 1 + warp * 3;
