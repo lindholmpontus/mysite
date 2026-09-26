@@ -34,7 +34,7 @@ export default function JourneyWorld({
       <Sun />
 
       {PLANETS.map((planet) => (
-        <Planet key={planet.id} planet={planet} />
+        <Planet key={planet.id} planet={planet} quality={quality} />
       ))}
 
       {/* asteroid belt in its real place — between Mars and Jupiter — so the
