@@ -25,6 +25,7 @@ import SoundToggle from "../ui/SoundToggle";
 import FragmentMeter from "../ui/FragmentMeter";
 import BootScreen from "../ui/BootScreen";
 import { playArrival, playDepart, playScan } from "../audio/spaceAudio";
+import { predecodePanelImages } from "../data/predecodeImages";
 
 const PLANET_STOPS = STOPS.filter((s) => s.kind === "planet");
 const LAST = STOPS.length - 1;
@@ -41,6 +42,7 @@ export default function JourneyPage() {
   // user "jacks in" and we reveal space. Journey input is disabled until live.
   const [live, setLive] = useState(false);
   const liveRef = useRef(false);
+  useEffect(predecodePanelImages, []);
   const goLive = () => {
     liveRef.current = true;
     setLive(true);

@@ -4,6 +4,7 @@
 // input.
 import React, { Suspense, memo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
+import { Preload } from "@react-three/drei";
 import {
   EffectComposer,
   Bloom,
@@ -59,6 +60,10 @@ function JourneyCanvasInner({
           activeIndex={activeIndex}
           reticle={reticle}
         />
+        {/* compile every shader and upload every texture while the boot screen
+            still covers the scene — including hidden objects (warp streaks),
+            which would otherwise compile mid-flight on the first departure */}
+        <Preload all />
       </Suspense>
 
       {quality === "high" && (

@@ -58,15 +58,21 @@ export default function StopPanel({ stop, index, total }) {
           className={`holo-flicker pointer-events-none absolute inset-y-0 ${beamSide} w-px`}
           style={{ background: accent, boxShadow: `0 0 14px ${accent}` }}
         />
-        {/* one-shot boot sweep */}
+        {/* one-shot boot sweep — a panel-sized carrier slides the band down
+            with a transform (composited), not `top` (a relayout + repaint
+            every frame) */}
         <Motion.span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 h-10"
-          style={{ background: `linear-gradient(${accent}00, ${accent}66, ${accent}00)` }}
-          initial={{ top: "-12%", opacity: 0.9 }}
-          animate={{ top: "112%", opacity: 0 }}
+          className="pointer-events-none absolute inset-0"
+          initial={{ y: "-12%", opacity: 0.9 }}
+          animate={{ y: "112%", opacity: 0 }}
           transition={{ duration: 0.65, ease: "easeOut" }}
-        />
+        >
+          <span
+            className="absolute inset-x-0 top-0 h-10"
+            style={{ background: `linear-gradient(${accent}00, ${accent}66, ${accent}00)` }}
+          />
+        </Motion.span>
 
         {/* grab handle (mobile sheet) */}
         <div className="sm:hidden relative z-10 flex justify-center pt-2.5 pb-0.5">

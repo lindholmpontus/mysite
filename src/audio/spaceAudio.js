@@ -17,6 +17,8 @@ let engineOscs = [];
 let started = false;
 let muted = false;
 let raf = 0;
+let lastTick = 0;
+let lastWarp = -1;
 
 function buildGraph() {
   master = ctx.createGain();
@@ -87,9 +89,20 @@ function buildGraph() {
   });
 }
 
-function tick() {
+// The engine follows warp at ~30 Hz, and only when warp actually moved. Every
+// setTargetAtTime() adds an automation event: five per animation frame (1,200/s
+// on a 240 Hz screen — and a suspended context never retires any) piled up
+// until inserting one ate half of every frame's CPU time.
+const TICK_MS = 33;
+
+function tick(t = 0) {
   if (!ctx) return;
+  raf = requestAnimationFrame(tick);
+  if (t - lastTick < TICK_MS || ctx.state !== "running") return;
+  lastTick = t;
   const warp = journeyState.warp || 0;
+  if (Math.abs(warp - lastWarp) < 0.002) return;
+  lastWarp = warp;
   const now = ctx.currentTime;
   engineGain.gain.setTargetAtTime(Math.min(1, warp * 1.5) * 0.16, now, 0.12);
   // open the filter as you speed up (more harmonics = more "power"), but keep it
@@ -97,7 +110,6 @@ function tick() {
   engineFilter.frequency.setTargetAtTime(70 + warp * 320, now, 0.12);
   // a subtle pitch "rev" with speed
   for (const o of engineOscs) o.frequency.setTargetAtTime(o.baseFreq * (1 + warp * 0.22), now, 0.15);
-  raf = requestAnimationFrame(tick);
 }
 
 export function initAudio() {
