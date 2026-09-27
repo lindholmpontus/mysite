@@ -1,8 +1,7 @@
 // CareerSection.jsx — experience and education on one timeline (from the CV):
-// each employer with its roles and highlights, earlier jobs as one-liners,
-// then education.
+// each employer with its roles and highlights, then education.
 import React from "react";
-import { EXPERIENCE, EARLIER_ROLES, EDUCATION } from "../data/content";
+import { EXPERIENCE, EDUCATION } from "../data/content";
 
 function Label({ children }) {
   return <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40 mb-4">{children}</p>;
@@ -64,18 +63,6 @@ export default function CareerSection({ accent }) {
               </div>
             </div>
           ))}
-
-          <ul className="space-y-2.5">
-            {EARLIER_ROLES.map((r) => (
-              <li key={r.title} className="relative flex flex-wrap items-baseline justify-between gap-x-4">
-                <Node accent={accent} />
-                <span className="text-sm text-white/80">
-                  {r.title} <span className="text-white/40">· {r.org}, {r.place}</span>
-                </span>
-                <span className="font-mono text-[11px] text-white/40">{r.period}</span>
-              </li>
-            ))}
-          </ul>
         </div>
       </section>
 

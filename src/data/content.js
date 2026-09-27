@@ -30,7 +30,6 @@ export const PROFILE = {
   about: [
     "Data & AI Engineer at Sogeti in Gävle with a Bachelor's degree in computer science. I work on a client assignment where I deliver use cases, develop their data platform in Microsoft Fabric and build AI-related solutions.",
     "Curious by nature, I like understanding how things work and finding simple, sustainable solutions. Social too — happiest working closely with others, preferably on-site and in environments where people learn from each other.",
-    "Happy in my current role, but always open to interesting opportunities.",
   ],
   languages: "Swedish · English",
 };
@@ -73,12 +72,6 @@ export const EXPERIENCE = [
       },
     ],
   },
-];
-
-export const EARLIER_ROLES = [
-  { title: "Archive Officer", org: "Depona AB", place: "Falun", period: "March 2020 – Aug. 2022" },
-  { title: "Warehouse Worker", org: "Manpower", place: "Falun", period: "Nov. 2019 – March 2020" },
-  { title: "Industrial Cleaning Technician", org: "Enerco AB", place: "Borlänge", period: "Oct. 2018 – Oct. 2019" },
 ];
 
 export const EDUCATION = [

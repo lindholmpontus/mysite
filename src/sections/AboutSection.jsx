@@ -8,7 +8,6 @@ export default function AboutSection({ accent }) {
   const facts = [
     ["Based in", PROFILE.location],
     ["Languages", PROFILE.languages],
-    ["Status", "Open to opportunities"],
   ];
   return (
     <div>
@@ -33,13 +32,11 @@ export default function AboutSection({ accent }) {
         ))}
       </div>
 
-      <dl className="mt-8 grid grid-cols-3 gap-4 pt-5 border-t border-white/10">
-        {facts.map(([label, value], i) => (
+      <dl className="mt-8 grid grid-cols-2 gap-4 pt-5 border-t border-white/10">
+        {facts.map(([label, value]) => (
           <div key={label}>
             <dt className="font-mono text-[10px] tracking-[0.22em] uppercase text-white/40">{label}</dt>
-            <dd className="mt-1.5 text-sm" style={{ color: i === 2 ? "#86f3a6" : "rgba(255,255,255,0.85)" }}>
-              {value}
-            </dd>
+            <dd className="mt-1.5 text-sm text-white/85">{value}</dd>
           </div>
         ))}
       </dl>

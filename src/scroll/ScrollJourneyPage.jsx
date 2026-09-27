@@ -71,7 +71,7 @@ export default function ScrollJourneyPage() {
             total={TOTAL}
           />
         ))}
-        <CompleteSection count={recovered.size} total={TOTAL} />
+        <CompleteSection />
       </main>
 
       {live && (
