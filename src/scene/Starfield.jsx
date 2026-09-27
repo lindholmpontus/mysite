@@ -133,7 +133,8 @@ const starFragment = /* glsl */ `
   }
 `;
 
-export default function Starfield({ quality = "high" }) {
+// skyBrightness: the Milky Way band's strength (a narrow lens magnifies it)
+export default function Starfield({ quality = "high", skyBrightness = SKY_BRIGHTNESS }) {
   const groupRef = useRef();
   const showSky = quality !== "low";
   const starCount = quality === "low" ? 2000 : quality === "medium" ? 5000 : 9000;
@@ -155,13 +156,13 @@ export default function Starfield({ quality = "high" }) {
     const skyMaterial = new THREE.MeshBasicMaterial({
       map: sky,
       // a touch cool, so only the core reads warm (dim warm light goes brown)
-      color: new THREE.Color(SKY_BRIGHTNESS, SKY_BRIGHTNESS * 1.01, SKY_BRIGHTNESS * 1.1),
+      color: new THREE.Color(skyBrightness, skyBrightness * 1.01, skyBrightness * 1.1),
       side: THREE.BackSide,
       depthWrite: false,
       fog: false,
     });
     return { stars: buildStars(starCount, grainCount, mulberry32(4242)), starMaterial, skyMaterial };
-  }, [starCount, grainCount, sky]);
+  }, [starCount, grainCount, sky, skyBrightness]);
 
   useFrame(({ camera }) => {
     if (groupRef.current) groupRef.current.position.copy(camera.position);

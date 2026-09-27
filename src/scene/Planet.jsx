@@ -13,8 +13,12 @@ import { textureUrl } from "./planets.config";
 import { createSurfaceMaterial, createAtmosphereMaterial } from "./planetShaders";
 
 const CLOUD_DRIFT = 0.0022; // clouds' own circulation, in texture widths/sec
+const ORIGIN = [0, 0, 0]; // the flight scene's sun
 
-export default function Planet({ planet, quality = "high" }) {
+// groupRef: the outer group, for callers that move the planet each frame (the
+// scroll layout anchors planets to page elements); sunPos: world position of
+// the light (pass a stable array — the flight scene's sun sits at the origin)
+export default function Planet({ planet, quality = "high", groupRef, sunPos = ORIGIN, tilt }) {
   const meshRef = useRef();
   const gl = useThree((s) => s.gl);
 
@@ -41,12 +45,9 @@ export default function Planet({ planet, quality = "high" }) {
     }
     if (tex.clouds) tex.clouds.wrapS = THREE.RepeatWrapping; // they drift past the seam
 
-    const center = new THREE.Vector3(...planet.position);
     const ring = planet.ring && {
       texture: tex.ring,
-      center,
-      // the ring plane is the equator: the tilted +Y axis
-      normal: new THREE.Vector3(0, 1, 0).applyEuler(new THREE.Euler(...(planet.tilt || [0, 0, 0]))),
+      sunPos,
       inner: planet.radius * planet.ring.inner,
       outer: planet.radius * planet.ring.outer,
     };
@@ -54,20 +55,20 @@ export default function Planet({ planet, quality = "high" }) {
     const a = planet.atmosphere;
     const top = 1 + (a?.scaleHeight ?? 0) * 8; // e^-8: nothing visible beyond
     return {
-      surface: createSurfaceMaterial({ maps: tex, limb: planet.limb, ring }),
+      surface: createSurfaceMaterial({ maps: tex, limb: planet.limb, ring, sunPos }),
       atmosphere: a && {
         top,
         material: createAtmosphereMaterial({
           ...a,
-          center: planet.position,
           radius: planet.radius,
+          sunPos,
           top,
           steps: quality === "high" ? 12 : quality === "medium" ? 8 : 5,
         }),
       },
       ringInfo: ring,
     };
-  }, [tex, planet, quality, gl]);
+  }, [tex, planet, quality, gl, sunPos]);
 
   useFrame((_, dt) => {
     if (meshRef.current) meshRef.current.rotation.y += dt * planet.spin;
@@ -76,10 +77,10 @@ export default function Planet({ planet, quality = "high" }) {
   });
 
   return (
-    <group position={planet.position}>
+    <group ref={groupRef} position={groupRef ? undefined : planet.position}>
       {/* axial tilt — realism, and it keeps Saturn's rings reading as an ellipse
           (not an edge-on sliver) now that the camera flies at the planet's height */}
-      <group rotation={planet.tilt || [0, 0, 0]}>
+      <group rotation={tilt || planet.tilt || [0, 0, 0]}>
         <mesh ref={meshRef} material={surface}>
           <sphereGeometry args={[planet.radius, 128, 64]} />
         </mesh>

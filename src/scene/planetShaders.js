@@ -6,8 +6,9 @@
 //     bright limb, blue haze over the disc edge, and extinction of what's behind
 //   - Saturn's rings: a real radial opacity profile, lit/unlit face, and the
 //     planet's shadow across them
-// All lighting comes from the sun at the world origin (same as the scene's
-// point light), so every body agrees on where the light is.
+// Light comes from `uSunPos` (the sun at the world origin in the flight
+// scene; a far-off direction in the scroll layout). Centres and ring axes are
+// derived from each mesh's own transform, so bodies can move freely.
 import * as THREE from "three";
 import { SUN_LIGHT } from "./planets.config";
 
@@ -27,11 +28,20 @@ const surfaceVertex = /* glsl */ `
   #ifdef USE_CLOUDS
   varying vec3 vEastW;
   #endif
+  #ifdef USE_RING_SHADOW
+  varying vec3 vCenterW;
+  varying vec3 vRingNormalW;
+  #endif
   void main() {
     vUv = uv;
     vec4 wp = modelMatrix * vec4(position, 1.0);
     vPosW = wp.xyz;
     vNormalW = normalize(mat3(modelMatrix) * normal);
+    #ifdef USE_RING_SHADOW
+    vCenterW = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+    // the rings lie in the equator: the (tilted) spin axis is their normal
+    vRingNormalW = normalize(mat3(modelMatrix) * vec3(0.0, 1.0, 0.0));
+    #endif
     #ifdef USE_CLOUDS
     // direction of increasing longitude (u) on three's SphereGeometry
     vEastW = mat3(modelMatrix) * vec3(position.z, 0.0, -position.x + 1e-4);
@@ -54,9 +64,9 @@ const surfaceFragment = /* glsl */ `
   #endif
   #ifdef USE_RING_SHADOW
   uniform sampler2D uRing;
-  uniform vec3 uCenter;
-  uniform vec3 uRingNormal;
   uniform vec2 uRingSpan;
+  varying vec3 vCenterW;
+  varying vec3 vRingNormalW;
   #endif
   varying vec2 vUv;
   varying vec3 vPosW;
@@ -97,9 +107,10 @@ const surfaceFragment = /* glsl */ `
 
     #ifdef USE_RING_SHADOW
     // march the sun ray to the ring plane; its opacity there shadows the globe
-    float den = dot(L, uRingNormal);
-    float t = -dot(vPosW - uCenter, uRingNormal) / (abs(den) > 1e-4 ? den : 1e-4);
-    float rr = length(vPosW + L * t - uCenter);
+    vec3 rn = normalize(vRingNormalW);
+    float den = dot(L, rn);
+    float t = -dot(vPosW - vCenterW, rn) / (abs(den) > 1e-4 ? den : 1e-4);
+    float rr = length(vPosW + L * t - vCenterW);
     float ru = (rr - uRingSpan.x) / (uRingSpan.y - uRingSpan.x);
     float onRing = step(0.0, t) * step(0.0, ru) * step(ru, 1.0);
     col *= 1.0 - 0.9 * onRing * textureLod(uRing, vec2(clamp(ru, 0.0, 1.0), 0.5), 0.0).a;
@@ -111,13 +122,13 @@ const surfaceFragment = /* glsl */ `
   }
 `;
 
-// maps: { map, clouds?, ocean? } (loaded textures); ring: { texture, normal,
-// center, inner, outer } for the ring-shadow variant
-export function createSurfaceMaterial({ maps, limb = 0.9, ring = null }) {
+// maps: { map, clouds?, ocean? } (loaded textures); ring: { texture, inner,
+// outer } for the ring-shadow variant; sunPos: world position of the light
+export function createSurfaceMaterial({ maps, limb = 0.9, ring = null, sunPos = [0, 0, 0] }) {
   const defines = {};
   const uniforms = {
     uMap: { value: maps.map },
-    uSunPos: { value: new THREE.Vector3(0, 0, 0) },
+    uSunPos: { value: new THREE.Vector3(...sunPos) },
     uSunColor: { value: sunRadiance() },
     uLimb: { value: limb },
     uAmbient: { value: 0.012 },
@@ -131,8 +142,6 @@ export function createSurfaceMaterial({ maps, limb = 0.9, ring = null }) {
   if (ring) {
     defines.USE_RING_SHADOW = "";
     uniforms.uRing = { value: ring.texture };
-    uniforms.uCenter = { value: ring.center };
-    uniforms.uRingNormal = { value: ring.normal };
     uniforms.uRingSpan = { value: new THREE.Vector2(ring.inner, ring.outer) };
   }
   return new THREE.ShaderMaterial({
@@ -149,9 +158,11 @@ export function createSurfaceMaterial({ maps, limb = 0.9, ring = null }) {
 
 const atmoVertex = /* glsl */ `
   varying vec3 vPosW;
+  varying vec3 vCenterW;
   void main() {
     vec4 wp = modelMatrix * vec4(position, 1.0);
     vPosW = wp.xyz;
+    vCenterW = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
     gl_Position = projectionMatrix * viewMatrix * wp;
   }
 `;
@@ -160,7 +171,6 @@ const atmoVertex = /* glsl */ `
 // rgb = in-scattered light, a = transmittance, blended as src + dst * a — so
 // the shell both glows and dims the surface / stars seen through it.
 const atmoFragment = /* glsl */ `
-  uniform vec3 uCenter;
   uniform float uRadius;
   uniform float uTop;
   uniform float uH;
@@ -170,6 +180,7 @@ const atmoFragment = /* glsl */ `
   uniform vec3 uSunPos;
   uniform vec3 uSunColor;
   varying vec3 vPosW;
+  varying vec3 vCenterW;
 
   vec2 raySphere(vec3 o, vec3 d, float r) {
     float b = dot(o, d);
@@ -191,7 +202,7 @@ const atmoFragment = /* glsl */ `
   }
 
   void main() {
-    vec3 o = (cameraPosition - uCenter) / uRadius;
+    vec3 o = (cameraPosition - vCenterW) / uRadius;
     vec3 d = normalize(vPosW - cameraPosition);
     vec2 ta = raySphere(o, d, uTop);
     if (ta.x > ta.y || ta.y < 0.0) discard;
@@ -200,7 +211,7 @@ const atmoFragment = /* glsl */ `
     vec2 tp = raySphere(o, d, 1.0);
     if (tp.x > 0.0 && tp.x < tp.y) t1 = tp.x;
 
-    vec3 L = normalize(uSunPos - uCenter);
+    vec3 L = normalize(uSunPos - vCenterW);
     float mu = dot(d, L);
     float phR = 0.0596831 * (1.0 + mu * mu);
     float g2 = uG * uG;
@@ -243,7 +254,6 @@ const atmoFragment = /* glsl */ `
 // rayleigh / haze: optical depth straight up (per colour channel);
 // scaleHeight: density e-folding height as a fraction of the radius.
 export function createAtmosphereMaterial({
-  center,
   radius,
   rayleigh,
   haze = [0, 0, 0],
@@ -252,19 +262,19 @@ export function createAtmosphereMaterial({
   intensity = 1,
   top,
   steps = 12,
+  sunPos = [0, 0, 0],
 }) {
   const H = scaleHeight;
   return new THREE.ShaderMaterial({
     defines: { STEPS: steps, LIGHT_EXT: "0.3" },
     uniforms: {
-      uCenter: { value: new THREE.Vector3(...center) },
       uRadius: { value: radius },
       uTop: { value: top },
       uH: { value: H },
       uBetaR: { value: new THREE.Vector3(...rayleigh).divideScalar(H) },
       uBetaM: { value: new THREE.Vector3(...haze).divideScalar(H) },
       uG: { value: g },
-      uSunPos: { value: new THREE.Vector3(0, 0, 0) },
+      uSunPos: { value: new THREE.Vector3(...sunPos) },
       // physical sun irradiance (single scattering has no albedo/π factor)
       uSunColor: { value: sunRadiance().multiplyScalar(Math.PI * intensity) },
     },
@@ -288,10 +298,14 @@ export function createAtmosphereMaterial({
 const ringVertex = /* glsl */ `
   varying vec2 vLocal;
   varying vec3 vPosW;
+  varying vec3 vCenterW;
+  varying vec3 vNormalW;
   void main() {
     vLocal = position.xy;
     vec4 wp = modelMatrix * vec4(position, 1.0);
     vPosW = wp.xyz;
+    vCenterW = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+    vNormalW = normalize(mat3(modelMatrix) * vec3(0.0, 0.0, 1.0)); // ring built in XY
     gl_Position = projectionMatrix * viewMatrix * wp;
   }
 `;
@@ -299,16 +313,17 @@ const ringVertex = /* glsl */ `
 const ringFragment = /* glsl */ `
   uniform sampler2D uRing;
   uniform vec2 uSpan;
-  uniform vec3 uCenter;
   uniform float uPlanetR;
-  uniform vec3 uNormal;
   uniform vec3 uSunPos;
   uniform vec3 uSunColor;
   uniform float uBright;
   varying vec2 vLocal;
   varying vec3 vPosW;
+  varying vec3 vCenterW;
+  varying vec3 vNormalW;
 
   void main() {
+    vec3 uNormal = normalize(vNormalW);
     float u = (length(vLocal) - uSpan.x) / (uSpan.y - uSpan.x);
     if (u < 0.0 || u > 1.0) discard;
     vec4 tex = texture2D(uRing, vec2(u, 0.5));
@@ -318,7 +333,7 @@ const ringFragment = /* glsl */ `
     vec3 V = normalize(cameraPosition - vPosW);
 
     // the globe's shadow across the rings
-    vec3 oc = vPosW - uCenter;
+    vec3 oc = vPosW - vCenterW;
     float b = dot(oc, L);
     float miss = sqrt(max(dot(oc, oc) - b * b, 0.0));
     float shadow = b < 0.0 ? smoothstep(uPlanetR * 0.985, uPlanetR * 1.015, miss) : 1.0;
@@ -335,15 +350,13 @@ const ringFragment = /* glsl */ `
   }
 `;
 
-export function createRingMaterial({ texture, inner, outer, center, planetRadius, normal }) {
+export function createRingMaterial({ texture, inner, outer, planetRadius, sunPos = [0, 0, 0] }) {
   return new THREE.ShaderMaterial({
     uniforms: {
       uRing: { value: texture },
       uSpan: { value: new THREE.Vector2(inner, outer) },
-      uCenter: { value: center },
       uPlanetR: { value: planetRadius },
-      uNormal: { value: normal },
-      uSunPos: { value: new THREE.Vector3(0, 0, 0) },
+      uSunPos: { value: new THREE.Vector3(...sunPos) },
       uSunColor: { value: sunRadiance() },
       uBright: { value: 1.25 },
     },
