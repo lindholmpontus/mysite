@@ -8,6 +8,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Preload } from "@react-three/drei";
 import { EffectComposer, Bloom, ToneMapping } from "@react-three/postprocessing";
 import { ToneMappingMode } from "postprocessing";
+import * as THREE from "three";
 import Starfield from "../scene/Starfield";
 import Planet from "../scene/Planet";
 import Sun from "../scene/Sun";
@@ -27,22 +28,32 @@ function ScrollSampler() {
 }
 
 // the sky turns a little over the whole page: a sense of travel without a
-// camera that moves (which would pull the bodies off their slots). It starts
-// on a fainter stretch of the Milky Way crossing the view diagonally — this
-// narrow lens magnifies the bright core into a brown haze — and turns toward
-// the core as you near the end.
-const SKY_YAW_START = 0.95;
-const SKY_YAW_TRAVEL = -0.75;
+// camera that moves (which would pull the bodies off their slots). The launch
+// frames the galactic core just up-left of the name, the band running
+// diagonally through the hero, brighter there; scrolling turns the sky so the
+// core drifts out to the left and the band settles to a subtler backdrop.
+const SKY_YAW_TRAVEL = 0.9;
+const SKY_GAIN_HERO = 0.27;
+const SKY_GAIN_REST = 0.17;
+// yaw that puts the core at the same spot on screen for any aspect (a
+// narrow phone view would otherwise leave it off-screen)
+const coreYaw = (aspect) => THREE.MathUtils.clamp(-0.13 + (aspect - 1.78) * 0.118, -0.3, -0.05);
+const smooth = (x) => {
+  x = Math.min(1, Math.max(0, x));
+  return x * x * (3 - 2 * x);
+};
 function TurningSky({ quality }) {
   const ref = useRef();
-  useFrame(() => {
+  const gain = useRef(SKY_GAIN_HERO);
+  useFrame(({ camera }) => {
     if (!ref.current) return;
     const p = scrollState.progress;
-    ref.current.rotation.set(0.1 + p * 0.12, SKY_YAW_START + p * SKY_YAW_TRAVEL, 0);
+    ref.current.rotation.set(0.04 + p * 0.12, coreYaw(camera.aspect) + p * SKY_YAW_TRAVEL, 0);
+    gain.current = SKY_GAIN_REST + (SKY_GAIN_HERO - SKY_GAIN_REST) * (1 - smooth(p / 0.22));
   });
   return (
     <group ref={ref}>
-      <Starfield quality={quality} skyBrightness={0.16} />
+      <Starfield quality={quality} gainRef={gain} detailCore />
     </group>
   );
 }

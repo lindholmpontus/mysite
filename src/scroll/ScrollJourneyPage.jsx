@@ -4,6 +4,7 @@
 // (wheel, trackpad momentum, touch, keys, the rail) and each planet rises in
 // beside its fragment of the résumé. The boot screen still opens it.
 import React, { createRef, useCallback, useEffect, useMemo, useState } from "react";
+import { motion as Motion, useScroll, useTransform } from "framer-motion";
 import SpaceCanvas from "./SpaceCanvas";
 import HeroSection from "./HeroSection";
 import PlanetSection from "./PlanetSection";
@@ -27,6 +28,10 @@ export default function ScrollJourneyPage() {
     []
   );
   const [live, setLive] = useState(false);
+  // the top fade only matters once content scrolls under the meter; over the
+  // bright launch sky it would read as a dark bar
+  const { scrollY } = useScroll();
+  const fadeOpacity = useTransform(scrollY, (y) => Math.min(1, Math.max(0, (y - innerHeight * 0.55) / (innerHeight * 0.4))));
   const [recovered, setRecovered] = useState(() => new Set());
 
   const onRecovered = useCallback((index) => {
@@ -77,8 +82,9 @@ export default function ScrollJourneyPage() {
       {live && (
         <>
           {/* content slides under a soft fade at the top, not into the meter */}
-          <div
+          <Motion.div
             aria-hidden="true"
+            style={{ opacity: fadeOpacity }}
             className="fixed inset-x-0 top-0 h-16 z-30 pointer-events-none bg-gradient-to-b from-black/90 via-black/60 to-transparent"
           />
           <FragmentMeter recovered={recovered} total={TOTAL} accents={ACCENTS} />

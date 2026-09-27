@@ -56,7 +56,7 @@ export const EXPERIENCE = [
         title: "Data & AI Engineer",
         period: "Sept. 2026 – present",
         points: [
-          "After six months in CareerBooster the client extended my assignment to 100%, building further on their data platform in Microsoft Fabric.",
+          "After CareerBooster the client chose to keep me on full-time, following strong feedback — building further on their data platform in Microsoft Fabric.",
           "Deliver use cases together with the business: from need to data pipelines, data quality and data people can base decisions on (Python, SQL and Spark).",
           "Push AI-driven development: shaping the platform and our ways of working to be AI-native, with the structure and quality checks that turn new technology into real value for the client.",
         ],
@@ -65,9 +65,9 @@ export const EXPERIENCE = [
         title: "CareerBooster · Data & AI Engineer",
         period: "March 2026 – Sept. 2026",
         points: [
-          "Sogeti's national trainee programme with a focus on Data & AI: 80% on a client assignment developing a data platform, 20% training.",
+          "Sogeti's national Data & AI trainee programme — with most of my time on a real client project from day one, developing their data platform.",
           "Developed a machine learning model forecasting product demand for another client.",
-          "Training in AI, data engineering and the consultant role.",
+          "Training in AI, data engineering and the consultant role alongside the client work.",
         ],
       },
     ],
