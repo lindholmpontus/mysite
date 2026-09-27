@@ -1,5 +1,5 @@
 // HeroSection.jsx — the launch: a pinned stage (sticky for the first stretch
-// of scroll) with the name and the mission, and the Sun cresting the bottom
+// of scroll) with the name and title, and the Sun cresting the bottom
 // edge. Scrolling lifts the text away and SETS the Sun (its slot is fixed to
 // the viewport, so the huge disc never sweeps up through the next sections),
 // then the stage releases and the first planet rises in.
@@ -33,37 +33,21 @@ export default function HeroSection({ sunSlot, live }) {
           style={{ opacity: textOpacity, y: textY }}
           className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6 -mt-[8vh]"
         >
-          <Motion.p
-            initial={{ opacity: 0, y: 12 }}
-            animate={live ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.3, duration: 0.8 }}
-            className="font-mono text-[10px] sm:text-xs tracking-[0.4em] uppercase text-white/50"
-          >
-            ◈ Recovery mission · 6 fragments
-          </Motion.p>
           <Motion.h1
             initial={{ opacity: 0, y: 18, letterSpacing: "0.3em" }}
             animate={live ? { opacity: 1, y: 0, letterSpacing: "0.1em" } : {}}
-            transition={{ delay: 0.45, duration: 1.1, ease: "easeOut" }}
-            className="font-display uppercase text-4xl sm:text-6xl lg:text-7xl mt-5 text-white [text-shadow:0_0_50px_rgba(255,190,120,0.35)]"
+            transition={{ delay: 0.3, duration: 1.1, ease: "easeOut" }}
+            className="font-display uppercase text-4xl sm:text-6xl lg:text-7xl text-white [text-shadow:0_0_50px_rgba(255,190,120,0.35)]"
           >
             {PROFILE.name}
           </Motion.h1>
           <Motion.p
             initial={{ opacity: 0 }}
             animate={live ? { opacity: 1 } : {}}
-            transition={{ delay: 0.9, duration: 0.8 }}
+            transition={{ delay: 0.75, duration: 0.8 }}
             className="font-mono text-xs sm:text-sm tracking-[0.25em] uppercase text-[#ffd9b0] mt-4"
           >
             {PROFILE.title} · {PROFILE.location}
-          </Motion.p>
-          <Motion.p
-            initial={{ opacity: 0 }}
-            animate={live ? { opacity: 1 } : {}}
-            transition={{ delay: 1.2, duration: 0.8 }}
-            className="max-w-md font-light text-sm sm:text-base text-white/60 mt-6 leading-relaxed"
-          >
-            An alien stole my résumé and scattered it across the solar system. Scroll to recover the fragments.
           </Motion.p>
         </Motion.div>
 

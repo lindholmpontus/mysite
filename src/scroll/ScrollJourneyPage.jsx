@@ -12,11 +12,9 @@ import SectionRail from "./SectionRail";
 import { SCROLL_PLANETS } from "./scrollConfig";
 import BootScreen from "../ui/BootScreen";
 import FragmentMeter from "../ui/FragmentMeter";
-import SoundToggle from "../ui/SoundToggle";
 import GpuHint from "../ui/GpuHint";
 import { detectQuality, isSoftwareRenderer } from "../journey/journeyConfig";
 import { predecodePanelImages } from "../data/predecodeImages";
-import { playArrival } from "../audio/spaceAudio";
 
 const TOTAL = SCROLL_PLANETS.length;
 const ACCENTS = SCROLL_PLANETS.map((e) => e.planet.accent);
@@ -34,7 +32,6 @@ export default function ScrollJourneyPage() {
   const onRecovered = useCallback((index) => {
     setRecovered((prev) => {
       if (prev.has(index)) return prev;
-      playArrival();
       return new Set(prev).add(index);
     });
   }, []);
@@ -79,12 +76,16 @@ export default function ScrollJourneyPage() {
 
       {live && (
         <>
+          {/* content slides under a soft fade at the top, not into the meter */}
+          <div
+            aria-hidden="true"
+            className="fixed inset-x-0 top-0 h-16 z-30 pointer-events-none bg-gradient-to-b from-black/90 via-black/60 to-transparent"
+          />
           <FragmentMeter recovered={recovered} total={TOTAL} accents={ACCENTS} />
           <SectionRail recovered={recovered} />
           <GpuHint />
         </>
       )}
-      <SoundToggle />
 
       {!live && <BootScreen onReveal={() => setLive(true)} />}
     </div>

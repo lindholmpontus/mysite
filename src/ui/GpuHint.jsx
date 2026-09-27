@@ -34,7 +34,7 @@ export default function GpuHint() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0, transition: { delay: 1.2, duration: 0.4 } }}
           exit={{ opacity: 0, y: 10, transition: { duration: 0.2 } }}
-          className="fixed bottom-5 left-[4.25rem] right-5 sm:right-auto z-40 max-w-sm flex items-start gap-3 rounded-lg border border-amber-300/25 bg-black/70 px-3.5 py-2.5 font-mono text-[11px] leading-relaxed text-white/70"
+          className="fixed bottom-5 left-5 right-5 sm:right-auto z-40 max-w-sm flex items-start gap-3 rounded-lg border border-amber-300/25 bg-black/70 px-3.5 py-2.5 font-mono text-[11px] leading-relaxed text-white/70"
         >
           <span aria-hidden="true" className="text-amber-300 mt-px">⚠</span>
           <p>

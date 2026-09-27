@@ -1,24 +1,48 @@
-// AboutSection.jsx — photo, name, and a short intro. No CV/contact here — that
-// lives at the end of the journey (Contact / outro).
+// AboutSection.jsx — portrait + role, the profile (from the CV), and a row
+// of quick facts. No CV/contact here — that lives at the end of the page.
 import React from "react";
 import { PROFILE } from "../data/content";
 import selfieImg from "../assets/selfie.png";
 
 export default function AboutSection({ accent }) {
+  const facts = [
+    ["Based in", PROFILE.location],
+    ["Languages", PROFILE.languages],
+    ["Status", "Open to opportunities"],
+  ];
   return (
-    <div className="flex flex-col items-center text-center">
-      <img
-        src={selfieImg}
-        alt={PROFILE.name}
-        className="w-32 h-32 rounded-full object-cover border-2"
-        style={{ borderColor: `${accent}80`, boxShadow: `0 0 40px ${accent}55` }}
-      />
-      <h3 className="font-mono text-2xl mt-5">{PROFILE.name}</h3>
-      <p className="font-mono text-xs tracking-[3px] uppercase mt-2" style={{ color: accent }}>
-        {PROFILE.title} · {PROFILE.location}
-      </p>
+    <div>
+      <div className="flex items-center gap-5">
+        <img
+          src={selfieImg}
+          alt=""
+          className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover shrink-0"
+          style={{ boxShadow: `0 0 0 2px ${accent}99, 0 0 36px ${accent}55` }}
+        />
+        <div>
+          <p className="font-display uppercase tracking-[0.1em] text-base sm:text-lg text-white">{PROFILE.name}</p>
+          <p className="font-mono text-[11px] tracking-[0.2em] uppercase mt-1.5" style={{ color: accent }}>
+            {PROFILE.title} · {PROFILE.company}
+          </p>
+        </div>
+      </div>
 
-      <p className="text-gray-300 leading-relaxed font-light max-w-md mt-6">{PROFILE.intro}</p>
+      <div className="mt-7 space-y-4 text-[15px] leading-relaxed font-light text-white/80">
+        {PROFILE.about.map((p) => (
+          <p key={p}>{p}</p>
+        ))}
+      </div>
+
+      <dl className="mt-8 grid grid-cols-3 gap-4 pt-5 border-t border-white/10">
+        {facts.map(([label, value], i) => (
+          <div key={label}>
+            <dt className="font-mono text-[10px] tracking-[0.22em] uppercase text-white/40">{label}</dt>
+            <dd className="mt-1.5 text-sm" style={{ color: i === 2 ? "#86f3a6" : "rgba(255,255,255,0.85)" }}>
+              {value}
+            </dd>
+          </div>
+        ))}
+      </dl>
     </div>
   );
 }

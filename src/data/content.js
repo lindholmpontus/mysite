@@ -24,8 +24,15 @@ export const PROFILE = {
   phone: "070-778 30 65",
   linkedin: "https://www.linkedin.com/in/pontus-lindholm-170708368",
   github: "https://github.com/lindholmpontus",
-  intro:
-    "I work as a Data & AI Engineer and love software development just as much. I'm curious about technology and learning new things. The best part about work is bringing real ideas to life.",
+  company: "Sogeti",
+  // About me — the profile from the (English) CV
+  intro: "Data & AI Engineer at Sogeti in Gävle with a Bachelor's degree in computer science.",
+  about: [
+    "Data & AI Engineer at Sogeti in Gävle with a Bachelor's degree in computer science. I work on a client assignment where I deliver use cases, develop their data platform in Microsoft Fabric and build AI-related solutions.",
+    "Curious by nature, I like understanding how things work and finding simple, sustainable solutions. Social too — happiest working closely with others, preferably on-site and in environments where people learn from each other.",
+    "Happy in my current role, but always open to interesting opportunities.",
+  ],
+  languages: "Swedish · English",
 };
 
 export const SKILLS = [
@@ -40,29 +47,46 @@ export const SKILLS = [
   { logo: gitLogo, name: "Git" },
 ];
 
-// Career + education, newest first, shown together on one planet.
-export const CAREER = [
+// Career + education (from the English CV), newest first, on one planet.
+export const EXPERIENCE = [
   {
-    kind: "work",
-    role: "Data & AI Engineer",
     org: "Sogeti",
-    place: "Gävle, Sweden",
-    period: "Mar 2026 – Present",
-    points: [
-      "Helping customers build data platforms, AI solutions and modern software applications",
-      "Joined through Sogeti's CareerBooster program.",
+    place: "Gävle",
+    roles: [
+      {
+        title: "Data & AI Engineer",
+        period: "Sept. 2026 – present",
+        points: [
+          "After six months in CareerBooster the client extended my assignment to 100%, building further on their data platform in Microsoft Fabric.",
+          "Deliver use cases together with the business: from need to data pipelines, data quality and data people can base decisions on (Python, SQL and Spark).",
+          "Push AI-driven development: shaping the platform and our ways of working to be AI-native, with the structure and quality checks that turn new technology into real value for the client.",
+        ],
+      },
+      {
+        title: "CareerBooster · Data & AI Engineer",
+        period: "March 2026 – Sept. 2026",
+        points: [
+          "Sogeti's national trainee programme with a focus on Data & AI: 80% on a client assignment developing a data platform, 20% training.",
+          "Developed a machine learning model forecasting product demand for another client.",
+          "Training in AI, data engineering and the consultant role.",
+        ],
+      },
     ],
   },
+];
+
+export const EARLIER_ROLES = [
+  { title: "Archive Officer", org: "Depona AB", place: "Falun", period: "March 2020 – Aug. 2022" },
+  { title: "Warehouse Worker", org: "Manpower", place: "Falun", period: "Nov. 2019 – March 2020" },
+  { title: "Industrial Cleaning Technician", org: "Enerco AB", place: "Borlänge", period: "Oct. 2018 – Oct. 2019" },
+];
+
+export const EDUCATION = [
   {
-    kind: "education",
-    role: "Bachelor's Degree in Computer Science",
-    org: "University of Gävle",
-    place: "Gävle, Sweden",
-    period: "Graduated 2025",
-    points: [
-      "Thesis at Lantmäteriet: GraalVM Native Image vs JVM — performance & resource analysis.",
-      "Courses in software development, databases, mathematics, and more.",
-    ],
+    degree: "Bachelor's Degree in Computer Science",
+    school: "University of Gävle",
+    period: "Aug. 2022 – June 2025",
+    points: ["Thesis at Lantmäteriet: GraalVM Native Image vs JVM — performance & resource analysis."],
   },
 ];
 
