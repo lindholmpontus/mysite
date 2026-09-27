@@ -1,8 +1,7 @@
 // Planet.jsx — a spinning globe with a physically-motivated look (see
 // planetShaders.js): Minnaert-shaded surface, a ray-marched atmosphere shell,
 // and — for Saturn — its rings, each shadowing the other. It carries no label
-// of its own; the screen-space lock-on reticle (PlanetReticle) names the
-// active world.
+// of its own; its section's lock-on brackets (PlanetSection) name it.
 /* eslint-disable react-hooks/immutability -- textures are configured once before GPU upload; cloud drift is a per-frame uniform */
 import React, { useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
@@ -13,11 +12,11 @@ import { textureUrl } from "./planets.config";
 import { createSurfaceMaterial, createAtmosphereMaterial } from "./planetShaders";
 
 const CLOUD_DRIFT = 0.0022; // clouds' own circulation, in texture widths/sec
-const ORIGIN = [0, 0, 0]; // the flight scene's sun
+const ORIGIN = [0, 0, 0]; // default light: a sun at the world origin
 
 // groupRef: the outer group, for callers that move the planet each frame (the
 // scroll layout anchors planets to page elements); sunPos: world position of
-// the light (pass a stable array — the flight scene's sun sits at the origin)
+// the light (pass a stable array)
 export default function Planet({ planet, quality = "high", groupRef, sunPos = ORIGIN, tilt }) {
   const meshRef = useRef();
   const gl = useThree((s) => s.gl);
@@ -78,8 +77,8 @@ export default function Planet({ planet, quality = "high", groupRef, sunPos = OR
 
   return (
     <group ref={groupRef} position={groupRef ? undefined : planet.position}>
-      {/* axial tilt — realism, and it keeps Saturn's rings reading as an ellipse
-          (not an edge-on sliver) now that the camera flies at the planet's height */}
+      {/* axial tilt — realism, and it keeps Saturn's rings reading as an open
+          ellipse rather than an edge-on sliver */}
       <group rotation={tilt || planet.tilt || [0, 0, 0]}>
         <mesh ref={meshRef} material={surface}>
           <sphereGeometry args={[planet.radius, 128, 64]} />

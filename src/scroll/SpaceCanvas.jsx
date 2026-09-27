@@ -13,7 +13,7 @@ import Starfield from "../scene/Starfield";
 import Planet from "../scene/Planet";
 import Sun from "../scene/Sun";
 import { SUN } from "../scene/planets.config";
-import { isSoftwareRenderer } from "../journey/journeyConfig";
+import { isSoftwareRenderer } from "../lib/environment";
 import ScrollDust from "./ScrollDust";
 import { useAnchor } from "./useAnchor";
 import { sampleScroll, scrollState } from "./scrollState";

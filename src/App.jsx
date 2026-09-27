@@ -5,7 +5,7 @@
 import React, { useMemo, useState } from "react";
 import ScrollJourneyPage from "./scroll/ScrollJourneyPage";
 import SummaryPage from "./pages/SummaryPage";
-import { hasWebGL, prefersReducedMotion } from "./journey/journeyConfig";
+import { hasWebGL, prefersReducedMotion } from "./lib/environment";
 
 export default function App() {
   const webgl = useMemo(() => hasWebGL(), []);

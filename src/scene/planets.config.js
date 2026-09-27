@@ -1,15 +1,8 @@
-// planets.config.js — the six content planets + the sun, laid out along the
-// scroll journey's route in TRUE solar-system order (sun outward):
-// Earth -> Mars -> Jupiter -> Saturn -> Uranus -> Neptune.
-// (Mercury and Venus are skipped; Earth comes first for familiarity.)
-//
-// Layout for EPIC SCALE: planets are big (r 7-13) and spaced 190 apart down -Z,
-// alternating sides (x = ±30). The camera parks close beside each planet (see
-// journeyConfig planetStop) so it fills ~45% of the screen height, and the
-// route S-weaves gently from one side to the other between stops. `side` = the
-// screen side the planet sits on (so x sign matches: left = -x, right = +x).
-// Geometry verified offline by scripts/verify-route.mjs — rerun it after
-// changing radii/positions here.
+// planets.config.js — the six content planets + the sun, in TRUE solar-system
+// order (sun outward): Earth -> Mars -> Jupiter -> Saturn -> Uranus -> Neptune
+// (Mercury and Venus are skipped; Earth comes first for familiarity). One
+// planet per page section — the scroll layout (src/scroll/scrollConfig.js)
+// pins each to its section; `position` is only a default world placement.
 //
 // Textures: true 2:1 equirectangular maps from Solar System Scope (CC BY 4.0,
 // https://www.solarsystemscope.com/textures/ — based on NASA mission imagery).
@@ -35,8 +28,8 @@ export const SUN = {
   texture: "sun.jpg",
 };
 
-// Each planet: id, label, section id (content), accent color, radius, journey
-// position, screen side, spin speed, axial tilt, plus its look:
+// Each planet: id, label, section id (content), accent color, radius, default
+// position, spin speed, axial tilt, plus its look:
 //   maps       — texture files (map; Earth adds clouds + ocean mask)
 //   limb       — Minnaert exponent: < 1 = the flatter disc real photos show
 //   atmosphere — vertical optical depth per RGB channel for Rayleigh and haze
@@ -53,7 +46,6 @@ export const PLANETS = [
     accent: "#5b9dff",
     radius: 8.5,
     position: [-30, 6, -140],
-    side: "left",
     spin: 0.12,
     tilt: [0, 0, 0.41],
   },
@@ -67,7 +59,6 @@ export const PLANETS = [
     accent: "#ff8a5b",
     radius: 7.2,
     position: [30, 6, -330],
-    side: "right",
     spin: 0.14,
     tilt: [0, 0, 0.44],
   },
@@ -81,7 +72,6 @@ export const PLANETS = [
     accent: "#e89a5b",
     radius: 13,
     position: [-30, 6, -520],
-    side: "left",
     spin: 0.08,
     tilt: [0, 0, 0.05],
   },
@@ -95,7 +85,6 @@ export const PLANETS = [
     accent: "#e8c87a",
     radius: 10.5,
     position: [30, 6, -710],
-    side: "right",
     spin: 0.1,
     // the rings lie in the equatorial plane; this tilt frames them as an open
     // ellipse from the parked camera (lit face toward you)
@@ -112,7 +101,6 @@ export const PLANETS = [
     accent: "#7adce8",
     radius: 8.5,
     position: [-30, 6, -900],
-    side: "left",
     spin: 0.11,
     tilt: [0, 0, 1.71],
   },
@@ -126,7 +114,6 @@ export const PLANETS = [
     accent: "#7a8cff",
     radius: 8.2,
     position: [30, 6, -1090],
-    side: "right",
     spin: 0.13,
     tilt: [0, 0, 0.49],
   },

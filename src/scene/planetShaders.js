@@ -6,9 +6,9 @@
 //     bright limb, blue haze over the disc edge, and extinction of what's behind
 //   - Saturn's rings: a real radial opacity profile, lit/unlit face, and the
 //     planet's shadow across them
-// Light comes from `uSunPos` (the sun at the world origin in the flight
-// scene; a far-off direction in the scroll layout). Centres and ring axes are
-// derived from each mesh's own transform, so bodies can move freely.
+// Light comes from `uSunPos` (the scroll layout puts it far off to one side
+// of each planet). Centres and ring axes are derived from each mesh's own
+// transform, so bodies can move freely.
 import * as THREE from "three";
 import { SUN_LIGHT } from "./planets.config";
 

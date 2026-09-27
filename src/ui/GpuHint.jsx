@@ -3,7 +3,7 @@
 // Tells the visitor the one setting that gives them the real thing.
 import React, { useState } from "react";
 import { AnimatePresence, motion as Motion } from "framer-motion";
-import { isSoftwareRenderer } from "../journey/journeyConfig";
+import { isSoftwareRenderer } from "../lib/environment";
 
 const KEY = "journey-gpu-hint-dismissed";
 

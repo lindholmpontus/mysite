@@ -56,7 +56,7 @@ function glowTexture() {
 }
 
 // groupRef: move the star from outside (the scroll layout's hero anchors it
-// to the page); light: include the scene's point light (the flight scene);
+// to the page); light: include a point light at the star for lit materials;
 // glow: a soft corona around the disc (for when the sun is on screen);
 // brightness: >1 pushes the disc into the bloom (a star, not a ball)
 export default function Sun({ groupRef, light = true, glow = false, brightness = 1 }) {

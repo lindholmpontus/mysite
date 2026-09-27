@@ -14,7 +14,7 @@ import { SCROLL_PLANETS } from "./scrollConfig";
 import BootScreen from "../ui/BootScreen";
 import FragmentMeter from "../ui/FragmentMeter";
 import GpuHint from "../ui/GpuHint";
-import { detectQuality, isSoftwareRenderer } from "../journey/journeyConfig";
+import { detectQuality, isSoftwareRenderer } from "../lib/environment";
 import { predecodePanelImages } from "../data/predecodeImages";
 
 const TOTAL = SCROLL_PLANETS.length;
