@@ -209,3 +209,13 @@ html[data-software-gl] .holo-flicker {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(100, 108, 255, 0.6);
 }
+
+/* hero scroll cue: a slow pulse running down the line */
+@keyframes scrollCuePulse {
+  0% { transform: scaleY(0); transform-origin: top; opacity: 1; }
+  55% { transform: scaleY(1); transform-origin: top; opacity: 1; }
+  100% { transform: scaleY(1); transform-origin: top; opacity: 0; }
+}
+.scroll-cue-line {
+  animation: scrollCuePulse 2.2s ease-in-out infinite;
+}

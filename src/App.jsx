@@ -3,7 +3,7 @@
 // default (with an opt-in into the journey where possible). The journey itself
 // has no manual "back to summary" exit — the summary is purely the auto-fallback.
 import React, { useMemo, useState } from "react";
-import JourneyPage from "./journey/JourneyPage";
+import ScrollJourneyPage from "./scroll/ScrollJourneyPage";
 import SummaryPage from "./pages/SummaryPage";
 import { hasWebGL, prefersReducedMotion } from "./journey/journeyConfig";
 
@@ -21,5 +21,5 @@ export default function App() {
     return <SummaryPage canFly={webgl} onEnterFlight={() => switchTo("journey")} />;
   }
 
-  return <JourneyPage />;
+  return <ScrollJourneyPage />;
 }
