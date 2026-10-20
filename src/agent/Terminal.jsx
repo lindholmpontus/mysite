@@ -228,7 +228,6 @@ export default function Terminal({ blocks, asking, onAnswer, running, onSkip, on
   // the highlighted option, remembered per question
   const [picked, setPicked] = useState({ for: null, i: 0 });
   const sel = asking && picked.for === asking.blockId ? picked.i : asking?.defaultIndex ?? 0;
-  const setSel = (f) => setPicked({ for: asking.blockId, i: f(sel) });
   const [draft, setDraft] = useState("");
   const inputRef = useRef(null);
 
@@ -246,8 +245,9 @@ export default function Terminal({ blocks, asking, onAnswer, running, onSkip, on
     const onKey = (e) => {
       if (asking) {
         const n = asking.options.length;
-        if (e.key === "ArrowDown" || e.key === "j") (setSel((s) => (s + 1) % n), e.preventDefault());
-        else if (e.key === "ArrowUp" || e.key === "k") (setSel((s) => (s - 1 + n) % n), e.preventDefault());
+        const move = (d) => (setPicked({ for: asking.blockId, i: (sel + d + n) % n }), e.preventDefault());
+        if (e.key === "ArrowDown" || e.key === "j") move(1);
+        else if (e.key === "ArrowUp" || e.key === "k") move(-1);
         else if (e.key === "Enter") (onAnswer(sel), e.preventDefault());
         else if (/^[1-9]$/.test(e.key) && +e.key <= n) onAnswer(+e.key - 1);
       }
@@ -255,7 +255,7 @@ export default function Terminal({ blocks, asking, onAnswer, running, onSkip, on
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [asking, sel, setSel, onAnswer, running, onSkip]);
+  }, [asking, sel, onAnswer, running, onSkip]);
 
   const submit = (e) => {
     e.preventDefault();

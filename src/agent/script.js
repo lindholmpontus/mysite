@@ -1,6 +1,6 @@
 // script.js — the whole "agent session", as data. Each audience shares one
-// storyline (sage builds carefully, TURBO barges in, pm-bot wants a bigger
-// logo) with its own lines and one audience-only bit.
+// storyline (sage is slow and summons TURBO, TURBO overdoes it and summons
+// pm-bot, pm-bot wants a bigger logo) with its own lines and one extra bit.
 import { PROFILE } from "../data/content";
 
 // event helpers
@@ -34,106 +34,69 @@ const TODO_LABELS = {
   contact: "Contact",
 };
 
-const DIFFS = {
-  hero: [
-    "+import { PROFILE } from '../data/content'",
-    "+",
-    "+export default function Hero() {",
-    `+  return <h1 className="name">{PROFILE.name}</h1>`,
-  ],
-  about: ["+export default function About() {", "+  return PROFILE.about.map((p) => <p>{p}</p>)", "+}"],
-  career: ["+const roles = EXPERIENCE.flatMap((e) => e.roles)", "+// newest first, like a good changelog"],
-  skills: [
-    "+<ul className=\"skills\">",
-    "+  {SKILLS.map(s => <li>{s.name}</li>)}",
-    "+</ul>",
-    '+<style>{`* { font-family: "Comic Sans MS" }`}</style>',
-  ],
-  projects: ["+export default function Projects() {", "+  return projects.map((p) => <Card {...p} />)"],
-  hobbies: ["+// guitar, gaming, gym, napping", "+HOBBIES.map((h) => <Hobby {...h} />)"],
-  contact: ["+<a href={`mailto:${PROFILE.email}`}>", "+  {PROFILE.email}", "+</a>"],
-};
-
-// Write a section: preview shows a skeleton, the tool call lands, the
-// section pops in with an HMR toast.
+// Write a section: the browser shows a skeleton, the tool call lands, the
+// section pops in with an HMR toast. Diffs only where they're the joke.
 function write(who, id, o = {}) {
   const file = SECTION_FILES[id];
-  const diff = DIFFS[id];
   return [
-    o.todo !== false && todo({ set: { [TODO_LABELS[id]]: "doing" } }),
+    todo({ set: { [TODO_LABELS[id]]: "doing" } }),
     site({ sections: { [id]: "building" }, focus: id }),
-    tool(who, "Write", file, {
-      diff,
-      result: `Wrote ${o.lines ?? 30 + ((id.length * 7) % 25)} lines`,
-      ms: o.ms ?? 1100,
-    }),
+    tool(who, "Write", file, { diff: o.diff, result: o.result || `Wrote ${o.lines ?? 40} lines`, ms: o.ms ?? 1300 }),
     site({ sections: { [id]: "built" }, hmr: file, ...(o.patch || {}) }),
-    o.todo !== false && todo({ set: { [TODO_LABELS[id]]: "done" } }),
-  ].filter(Boolean);
+    todo({ set: { [TODO_LABELS[id]]: "done" } }),
+  ];
 }
+
+// someone runs the summon command and a new agent shows up
+const summon = (by, who, cmd, result) => [
+  tool(by, "Bash", cmd, { result, ms: 1500 }),
+  join(who, `${who === "turbo" ? "TURBO" : "pm-bot"} joined the session`),
+];
 
 export const AUDIENCES = [
   { value: "recruiter", label: "Recruiter", hint: "busy · has 7 seconds" },
   { value: "developer", label: "Developer", hint: "will open devtools" },
   { value: "family", label: "Family / friend", hint: "just wants to know he's ok" },
   { value: "curious", label: "Just curious", hint: "mysterious" },
-  { value: "hurry", label: "I'm in a hurry", hint: "let TURBO drive ⚡" },
+  { value: "hurry", label: "I'm in a hurry", hint: "skip the small talk" },
 ];
 
 const A = {
   recruiter: {
     prompt: "build a portfolio site for a recruiter",
     open: "Ok… let's build this portfolio site for a recruiter.",
-    verbs: ["Aligning synergies", "Translating “Spark” into business value", "Polishing LinkedIn energy"],
-    read: `Found it. ${PROFILE.title} at ${PROFILE.company}, Microsoft Fabric, Spark, a CS degree. Career goes right after About — that's where recruiters look first.`,
-    turbo: "you are TOO SLOW!! 🐌 recruiters spend SEVEN SECONDS on a CV. you've used four on a <h1>. i'm gonna start working on this too!",
+    verb: "Translating “Spark” into business value",
+    turbo: "YOU RANG?? 🏎️ oh wow, a recruiter's waiting and you're on the ABOUT section?? move over",
     extra: [
-      say("turbo", "recruiters LOVE keywords. adding some real quick"),
-      tool("turbo", "Edit", SECTION_FILES.about, {
-        diff: ["+<p>synergy-driven, blockchain-ready, AI-native 10x rockstar ninja</p>"],
-        result: "Added 1 line (37 buzzwords)",
-        ms: 350,
-      }),
+      say("turbo", "recruiters LOVE keywords. adding some real quick", 9),
       site({ chaos: { buzz: true }, hmr: SECTION_FILES.about, focus: "about" }),
       say("sage", "He's a Data & AI Engineer. He does not need to be a ninja."),
-      tool("sage", "Edit", SECTION_FILES.about, {
-        diff: ["-<p>synergy-driven, blockchain-ready, AI-native 10x rockstar ninja</p>"],
-        result: "Removed 1 line",
-        ms: 500,
-      }),
       site({ chaos: { buzz: false }, hmr: SECTION_FILES.about }),
     ],
-    outro: "Done. Career's up top, contact's at the bottom, zero ninjas. Your seven seconds start now.",
-    turboOutro: "fastest portfolio in the west 🤠 (i did most of it)",
+    outro: "Done. Career's near the top, contact's at the bottom, zero ninjas. Your seven seconds start now.",
+    turboOutro: "fastest portfolio in the west 🤠",
   },
   developer: {
     prompt: "build a portfolio site for a developer",
-    open: "Ok… let's build this portfolio site for a developer. I'll keep the div soup to a minimum.",
-    verbs: ["Bikeshedding the folder structure", "Arguing about tabs vs spaces", "Reading the docs (for once)"],
-    read: "Found it. Java, Python, Spark, a GraalVM-vs-JVM thesis, a chess engine in Swing. Projects go near the top — you're here for the code.",
-    turbo: "you are TOO SLOW!! 🐌 they've already opened devtools. they're reading your class names RIGHT NOW. i'm gonna start working on this too!",
+    open: "Ok… let's build this portfolio site for a developer. Minimal div soup, I promise.",
+    verb: "Bikeshedding the folder structure",
+    turbo: "YOU RANG?? 🏎️ a dev is watching and you're still on the About section?? they've opened devtools, move over",
     extra: [
-      say("turbo", "devs love rust. rewriting the whole thing in rust 🦀"),
-      tool("turbo", "Bash", "cargo new portfolio --force", {
-        fail: true,
-        result: "error: this is a JavaScript project, TURBO",
-        ms: 500,
-      }),
-      say("sage", "We are not rewriting the portfolio in Rust."),
-      say("turbo", "not YET"),
+      say("turbo", "devs love rust. rewriting the whole thing in rust 🦀", 9),
+      tool("turbo", "Bash", "cargo new portfolio --force", { fail: true, result: "error: this is a JavaScript project, TURBO", ms: 600 }),
+      say("sage", "We are not rewriting it in Rust."),
     ],
-    outro: "Done. Projects up top, every link real, no Rust. View source if you want — it's honestly mostly setTimeout.",
-    turboOutro: "i'd have used a framework that came out yesterday but ok",
+    outro: "Done. Projects up top, every link is real. View source if you like — it's mostly setTimeout.",
+    turboOutro: "would've been faster in rust",
   },
   family: {
     prompt: "build a portfolio site for family",
     open: "Ok… let's build this portfolio site for family. I'll keep the jargon down. Mostly.",
-    verbs: ["Finding a photo where he's smiling", "Removing the word “pipeline”", "Making it fridge-worthy"],
-    read: `Found it. He works with data and AI at ${PROFILE.company} in Gävle — that's “computers”, roughly. Hobbies go higher up, since that's the part you actually ask about.`,
-    turbo: "you are TOO SLOW!! 🐌 grandma has been refreshing this page since 2009. i'm gonna start working on this too!",
+    verb: "Finding a photo where he's smiling",
+    turbo: "YOU RANG?? 🏎️ grandma has been refreshing this page since 2009, move over",
     extra: [
-      say("sage", "Adding a reassuring note that he's eating well and getting enough sleep."),
-      say("turbo", "there's a whole napping section. he's FINE"),
+      say("sage", "I'll add a note that he's eating well and sleeping enough."),
+      say("turbo", "there's a whole NAPPING section. he's fine", 9),
     ],
     outro: "Done. He's doing well, he has a real job, and yes — he still plays guitar.",
     turboOutro: "tell him to call his mom",
@@ -141,20 +104,17 @@ const A = {
   curious: {
     prompt: "build a portfolio site for whoever this is",
     open: "Ok… let's build this portfolio site for… you. Mysterious. I like it.",
-    verbs: ["Pondering", "Reticulating résumé", "Consulting the vibes"],
-    read: `Found it. ${PROFILE.name}, ${PROFILE.title} in Gävle. Guitar, League, and a strong position on napping.`,
-    turbo: "you are TOO SLOW!! 🐌 i'm gonna start working on this too!",
+    verb: "Consulting the vibes",
+    turbo: "YOU RANG?? 🏎️ ugh, you've done TWO sections. move over",
     extra: [
-      say("turbo", "every good website needs a cookie banner. EVERYONE loves cookie banners"),
+      say("turbo", "every website needs a cookie banner. EVERYONE loves cookie banners", 9),
       site({ chaos: { cookies: true }, hmr: "src/site/CookieBanner.jsx" }),
       wait(1400),
-      say("sage", "This site uses zero cookies, TURBO."),
-      say("turbo", "the banner doesn't know that"),
-      tool("sage", "Bash", "rm src/site/CookieBanner.jsx", { result: "removed 1 file 🍪", ms: 450 }),
+      say("sage", "This site has zero cookies, TURBO."),
       site({ chaos: { cookies: false } }),
     ],
     outro: "Done. Whoever you are — thanks for stopping by.",
-    turboOutro: "come back anytime. i'll make it faster. (it'll be in comic sans)",
+    turboOutro: "come back anytime. it'll be in comic sans",
   },
 };
 
@@ -171,14 +131,10 @@ const ALL_BUILT = Object.fromEntries(Object.keys(SECTION_FILES).map((id) => [id,
 function finale(o) {
   return [
     todo({ set: Object.fromEntries(Object.values(TODO_LABELS).map((l) => [l, "done"])) }),
-    think("Running final checks", 1400),
-    tool("sage", "Bash", "npm run build", {
-      result: o.buildResult,
-      ms: 900,
-    }),
+    tool("sage", "Bash", "npm run build", { result: o.buildResult, ms: 1200 }),
     site({ phase: "done", focus: "hero" }),
     say("sage", o.outro),
-    o.turboOutro && say("turbo", o.turboOutro),
+    o.turboOutro && say("turbo", o.turboOutro, 9),
     { t: "block", block: { kind: "summary", stats: o.stats } },
     {
       t: "ask",
@@ -199,30 +155,32 @@ function story(aud) {
     site({ audience: aud, order: SITE_ORDER[aud] }),
     user(a.prompt),
     say("sage", a.open),
-    think(a.verbs[0], 1700),
-    tool("sage", "Read", "src/data/content.js", { result: "Read 112 lines", ms: 600 }),
-    say("sage", a.read),
+    tool("sage", "Read", "src/data/content.js", { result: "Read 112 lines", ms: 900 }),
     todo({ items: SITE_ORDER[aud].map((id) => TODO_LABELS[id]) }),
     site({ phase: "build" }),
-    wait(700),
-    ...write("sage", "hero", { lines: 42 }),
-    think(a.verbs[1], 1500),
-    ...write("sage", "about", { lines: 36 }),
-    wait(500),
+    ...write("sage", "hero", { ms: 1700 }),
+    think(a.verb, 2000),
+    ...write("sage", "about", { ms: 1900 }),
 
-    // TURBO arrives
-    join("turbo", "TURBO joined the session"),
+    // sage is slow today and calls for backup
+    think("Writing the career section", 2600),
+    say("sage", "Hmm. Dang it, I'm slow today. I'm going to summon some help."),
+    ...summon("sage", "turbo", "npx summon-agent --fastest", "Installed 1 agent (437 dependencies, 12 vulnerabilities)"),
     say("turbo", a.turbo, 9),
-    say("sage", "We have a process, TURBO. There's a todo list."),
-    say("turbo", "todo lists are for people with TIME", 9),
+    say("sage", "Just help with the skills section. Please."),
     {
       t: "parallel",
       tracks: [
-        [think("Writing the career timeline", 2600), ...write("sage", "career", { lines: 58 })],
-        [wait(400), ...write("turbo", "skills", { ms: 250, lines: 9, patch: { chaos: { comic: true } } }), say("turbo", "DONE. skills. you're welcome 🔥", 9)],
+        write("sage", "career", { ms: 2600 }),
+        write("turbo", "skills", {
+          ms: 300,
+          diff: ['+* { font-family: "Comic Sans MS" !important }'],
+          result: "Wrote 9 lines in 0.3s",
+          patch: { chaos: { comic: true } },
+        }),
       ],
     },
-    say("sage", "…TURBO. Is that Comic Sans."),
+    say("sage", "…TURBO. Is that Comic Sans?"),
     say("turbo", "it's called PERSONALITY", 9),
     {
       t: "ask",
@@ -240,80 +198,62 @@ function story(aud) {
       id: "modesty",
       map: {
         yes: [
-          tool("turbo", "Bash", "rm -rf ./src/modesty", { result: "Removed 1 directory (it was very small)", ms: 400 }),
           site({ chaos: { modesty: true }, hmr: SECTION_FILES.hero, focus: "hero" }),
           say("turbo", "LETS GOOOOO", 9),
-          say("sage", "…I'll allow it. It's not technically wrong."),
+          say("sage", "…fine. It's not technically wrong."),
         ],
-        no: [say("turbo", "fine. FINE. 🙄", 9), say("sage", "Thank you.")],
+        no: [say("turbo", "fine. FINE. 🙄", 9)],
       },
     },
-    say("sage", "Reverting the Comic Sans. Some things are sacred."),
-    tool("sage", "Edit", SECTION_FILES.skills, {
-      diff: ['-* { font-family: "Comic Sans MS" }', "+/* nice try */"],
-      result: "Updated 1 line",
-      ms: 700,
-    }),
+    tool("sage", "Edit", SECTION_FILES.skills, { result: "Removed Comic Sans. Some things are sacred.", ms: 900 }),
     site({ chaos: { comic: false }, hmr: SECTION_FILES.skills, focus: "skills" }),
-    say("turbo", "you'll regret this when comic sans comes back", 9),
 
-    // merge conflict
-    say("sage", "Projects next."),
+    // both grab Projects.jsx
+    say("sage", "I'll take Projects."),
     say("turbo", "already on it", 9),
+    todo({ set: { Projects: "doing" } }),
     {
       t: "parallel",
       tracks: [
-        [tool("sage", "Write", SECTION_FILES.projects, { ms: 1200, result: "Wrote 64 lines" })],
+        [tool("sage", "Write", SECTION_FILES.projects, { ms: 1500, result: "Wrote 64 lines" })],
         [tool("turbo", "Write", SECTION_FILES.projects, { ms: 300, result: "Wrote 6 lines (all emojis)" })],
       ],
     },
-    todo({ set: { Projects: "doing" } }),
     site({ sections: { projects: "built" }, chaos: { conflict: true }, focus: "projects", hmr: SECTION_FILES.projects }),
-    sys("CONFLICT (content): Merge conflict in src/site/Projects.jsx", "err"),
-    say("sage", "We both wrote Projects.jsx. At the same time. Into the same file."),
+    sys("CONFLICT: both agents wrote src/site/Projects.jsx", "err"),
     say("turbo", "great minds 🤝", 9),
-    think("Resolving merge conflict (picking mine)", 1900),
-    tool("sage", "Edit", SECTION_FILES.projects, {
-      diff: ["-<<<<<<< TURBO", "-<h2>STUFF I MADE 🔥🔥🔥</h2>", "-=======", " <h2>Projects</h2>", "->>>>>>> sage"],
-      result: "Resolved. TURBO's emojis were moved to a comment, where they can't hurt anyone.",
-      ms: 800,
-    }),
+    think("Resolving the merge conflict (picking mine)", 2000),
+    tool("sage", "Edit", SECTION_FILES.projects, { result: "Resolved. TURBO's emojis now live in a comment.", ms: 600 }),
     site({ chaos: { conflict: false }, hmr: SECTION_FILES.projects }),
     todo({ set: { Projects: "done" } }),
 
     ...a.extra,
 
-    // pm-bot
-    wait(400),
-    join("pm", "pm-bot joined the session"),
-    say("pm", "Hey team! 👋 Love the energy here. Quick sync? Two tiny asks:"),
-    say("pm", "1. Can we make the logo bigger?"),
+    // TURBO decides the team needs a PM
+    say("turbo", "you know what this team needs? MANAGEMENT", 9),
+    say("sage", "No. Don't—"),
+    ...summon("turbo", "pm", "npx summon-agent --role=product-manager", "Installed 1 agent (it already booked a meeting)"),
+    say("pm", "Hey team! 👋 Love the energy. Tiny ask: can we make the logo bigger?"),
     site({ chaos: { logo: 1 }, focus: "hero", hmr: "src/site/Nav.jsx" }),
-    say("turbo", "DONE", 9),
-    say("pm", "2. Bigger."),
-    site({ chaos: { logo: 2 }, hmr: "src/site/Nav.jsx" }),
     wait(900),
+    say("pm", "Bigger."),
+    site({ chaos: { logo: 2 }, hmr: "src/site/Nav.jsx" }),
+    wait(1000),
     say("sage", "No."),
     site({ chaos: { logo: 0 }, hmr: "src/site/Nav.jsx" }),
-    say("pm", "Love that pushback. Let's take it offline 🙏"),
     sys("pm-bot left the session · scheduled 3 follow-up meetings"),
 
-    // last two in parallel
     {
       t: "parallel",
-      tracks: [
-        [...write("sage", "hobbies", { lines: 33 }), say("sage", "Hobbies: guitar, gaming, gym and… napping. “self explained”. I'm leaving that verbatim.")],
-        [wait(300), ...write("turbo", "contact", { ms: 350, lines: 21 }), say("turbo", "contact section done. the email works. i checked. (i can't check)", 9)],
-      ],
+      tracks: [write("sage", "hobbies", { ms: 1800 }), [wait(300), ...write("turbo", "contact", { ms: 400 })]],
     },
     ...finale({
-      buildResult: "✓ built in 0.42s · 0 errors · 1 Comic Sans incident",
+      buildResult: "✓ built in 0.42s · 1 Comic Sans incident",
       outro: a.outro,
       turboOutro: a.turboOutro,
       stats: [
         ["agents", "3 (one of them a PM)"],
         ["merge conflicts", "1"],
-        ["meetings scheduled", "3"],
         ["tokens used", "0 — it's all setTimeout"],
       ],
     }),
@@ -324,24 +264,21 @@ function hurry() {
   return [
     site({ audience: "hurry", order: SITE_ORDER.hurry }),
     user("just show me the site. fast."),
-    join("turbo", "TURBO has taken over the session"),
-    say("turbo", "FINALLY. someone who GETS it. stand back sage 🏎️💨", 8),
-    say("sage", "Wait, I haven't even read the—"),
+    say("sage", "Fast isn't really my thing. Let me get someone who's… enthusiastic."),
+    ...summon("sage", "turbo", "npx summon-agent --fastest", "Installed 1 agent (437 dependencies, 12 vulnerabilities)"),
+    say("turbo", "FINALLY. someone who GETS it 🏎️💨", 8),
     site({ phase: "build" }),
-    tool("turbo", "Write", "src/site/*", { ms: 450, result: "Wrote 7 files in 0.8s 🔥🔥" }),
+    tool("turbo", "Write", "src/site/*", { ms: 500, result: "Wrote 7 files in 0.8s 🔥" }),
     site({ sections: ALL_BUILT, chaos: { comic: true, logo: 2, modesty: true }, hmr: "src/site/*", focus: "hero" }),
-    say("turbo", "DONE. 0.8 seconds. new world record 🏆", 8),
-    say("sage", "It's in Comic Sans. The logo is the size of a house."),
-    say("turbo", "and you're WELCOME", 8),
-    think("Undoing 37 things TURBO did", 1500),
-    tool("sage", "Edit", "src/site/*", { result: "Fixed 37 issues. Kept 1 (it was flattering).", ms: 600 }),
+    say("turbo", "DONE. new world record 🏆", 8),
+    say("sage", "It's in Comic Sans and the logo is the size of a house. One second."),
+    think("Undoing 37 things TURBO did", 1600),
     site({ chaos: { comic: false, logo: 0 }, hmr: "src/site/*" }),
     ...finale({
-      buildResult: "✓ built in 0.8s · TURBO would like you to know it was 0.8s",
-      outro: "Done. Sorry about him. Here's the site.",
+      buildResult: "✓ built in 0.8s (TURBO wants you to know)",
+      outro: "Done. Sorry about him. Kept one thing he added — it was flattering.",
       stats: [
         ["time to first Comic Sans", "0.8s"],
-        ["issues fixed", "37"],
         ["tokens used", "0 — it's all setTimeout"],
       ],
     }),
@@ -358,14 +295,8 @@ export function introScript() {
   return [
     { t: "block", block: { kind: "welcome" } },
     wait(500),
-    say("sage", "Hi! I'm sage. I'm going to build Pontus's portfolio for you, live, right now."),
-    say("sage", "First — who's visiting?"),
-    {
-      t: "ask",
-      id: "aud",
-      question: "Who's visiting?",
-      options: AUDIENCES,
-    },
+    say("sage", "Hi! I'm sage. I'll build Pontus's portfolio for you, live. Who's visiting?"),
+    { t: "ask", id: "aud", question: "Who's visiting?", options: AUDIENCES },
     { t: "branch", id: "aud", map: Object.fromEntries(AUDIENCES.map((a) => [a.value, buildScript(a.value)])) },
   ];
 }
@@ -377,10 +308,10 @@ export function replyTo(input) {
   if (/^(\/)?(replay|restart|again)/.test(q)) return [site({ phase: "replay" })];
   if (/^(\/)?(open|site|show)/.test(q)) return [site({ phase: "open" })];
   if (/comic/.test(q)) return [say("turbo", "I KNEW IT. comic sans is BACK 🎉", 9), site({ chaos: { comic: true } }), wait(1500), say("sage", "No it isn't."), site({ chaos: { comic: false } })];
-  if (/logo|bigger/.test(q)) return [join("pm", "pm-bot joined the session"), say("pm", "I've been saying this for weeks."), site({ chaos: { logo: 2 } }), wait(1100), say("sage", "Still no."), site({ chaos: { logo: 0 } })];
+  if (/logo|bigger/.test(q)) return [join("pm", "pm-bot joined the session"), say("pm", "I've been saying this for weeks."), site({ chaos: { logo: 2 } }), wait(1100), say("sage", "Still no."), site({ chaos: { logo: 0 } }), sys("pm-bot left the session")];
   if (/rm -rf|sudo/.test(q)) return [say("turbo", "ON IT", 9), say("sage", "He is not on it.")];
   if (/^(\/)?help/.test(q)) return [sys("commands: /open · /replay · or just say something (try “make the logo bigger”)")];
-  if (/^(hi|hey|hello|hej|tja)/.test(q)) return [say("sage", "Hi! 👋"), say("turbo", "HI", 9)];
+  if (/^(hi|hey|hello|hej|tja)\b/.test(q)) return [say("sage", "Hi! 👋"), say("turbo", "HI", 9)];
   if (/\b(real|fake|ai|llm|gpt|claude|model|bot)\b/.test(q)) return [say("sage", "Honest answer: there's no model here. I'm a very elaborate setTimeout. TURBO too."), say("turbo", "speak for yourself", 9)];
   return [
     say("sage", "I'm not a real agent — I'm a very elaborate setTimeout. But I like the energy."),
