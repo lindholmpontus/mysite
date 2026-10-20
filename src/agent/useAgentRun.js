@@ -68,7 +68,7 @@ export function useAgentRun() {
           }
           patch(id, { text });
           // give the reader time before the next line lands
-          await sleep(hold ?? Math.min(3800, 700 + text.length * 26));
+          await sleep(hold ?? Math.min(3400, 600 + text.length * 24));
         },
         async user({ text }) {
           const id = push({ kind: "user", text: "", typing: true });
@@ -104,7 +104,7 @@ export function useAgentRun() {
         },
         async join({ who, text }) {
           push({ kind: "join", who, text });
-          await sleep(1100);
+          await sleep(800);
         },
         async sys({ text, tone }) {
           push({ kind: "sys", text, tone });

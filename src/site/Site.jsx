@@ -49,21 +49,9 @@ function Nav({ chaos, order, built }) {
   );
 }
 
-// title row in the old style: number, glowing rule, planet name; while the
-// agents fight over Projects.jsx the merge conflict replaces it
-function SectionHeader({ id, num, chaos }) {
+// title row in the old style: number, glowing rule, planet name
+function SectionHeader({ id, num }) {
   const s = SPACE[id];
-  if (id === "projects" && chaos.conflict) {
-    return (
-      <pre className="site-conflict">
-        {"<<<<<<< TURBO\n"}
-        <span className="text-2xl sm:text-3xl font-bold">STUFF I MADE 🔥🔥🔥</span>
-        {"\n=======\n"}
-        <span className="text-2xl sm:text-3xl">PROJECTS</span>
-        {"\n>>>>>>> sage"}
-      </pre>
-    );
-  }
   return (
     <header>
       <div className="flex items-center gap-4 font-space text-[11px] tracking-[0.35em] uppercase">
@@ -115,7 +103,7 @@ function PlanetSection({ id, index, status, chaos }) {
             <Skeleton />
           ) : (
             <div className="animate-rise">
-              <SectionHeader id={id} num={num} chaos={chaos} />
+              <SectionHeader id={id} num={num} />
               <div className="mt-9">
                 <C accent={s.accent} chaos={chaos} />
               </div>

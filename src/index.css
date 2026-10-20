@@ -688,26 +688,6 @@ body {
   transform: rotate(-2deg);
   box-shadow: 3px 3px 0 var(--turbo);
 }
-.site-conflict {
-  font-family: "Space Mono", monospace;
-  font-size: 13px;
-  line-height: 1.7;
-  padding: 1rem 1.25rem;
-  border-radius: 10px;
-  background: rgba(80, 10, 20, 0.55);
-  border: 2px dashed var(--err);
-  color: #ffb3b3;
-  white-space: pre-wrap;
-  animation: shake 0.4s 2;
-}
-@keyframes shake {
-  25% {
-    transform: translateX(-4px);
-  }
-  75% {
-    transform: translateX(4px);
-  }
-}
 
 .skel {
   border-radius: 6px;

@@ -1,7 +1,8 @@
 // script.js — the whole "agent session", as data. Each audience shares one
 // storyline (sage is slow and summons TURBO, TURBO overdoes it and summons
 // pm-bot, pm-bot's roadmap fills sage's context, TURBO "fixes" the tests)
-// with its own lines and one extra bit.
+// with its own lines and one extra bit. Aim for ~70s a run: every line
+// costs its reading time, so a new joke should replace a weaker one.
 
 // event helpers
 const say = (who, text, pace) => ({ t: "say", who, text, pace });
@@ -53,7 +54,7 @@ function write(who, id, o = {}) {
 
 // someone runs the summon command and a new agent shows up
 const summon = (by, who, cmd, result) => [
-  tool(by, "Bash", cmd, { result, ms: 1500 }),
+  tool(by, "Bash", cmd, { result, ms: 1100 }),
   join(who, `${who === "turbo" ? "TURBO" : "pm-bot"} joined the session`),
 ];
 const summonTurbo = (by) =>
@@ -180,14 +181,14 @@ function story(aud) {
     tool("sage", "Read", "src/data/content.js", { result: "Read 107 lines", ms: 900 }),
     todo({ items: ORDER.map((id) => TODO_LABELS[id]) }),
     site({ phase: "build" }),
-    ...write("sage", "hero", { ms: 1700 }),
-    think(a.verb, 2800),
-    ...write("sage", "about", { ms: 1900 }),
+    ...write("sage", "hero", { ms: 1300 }),
+    think(a.verb, 1700),
+    ...write("sage", "about", { ms: 1400 }),
 
     // sage is slow today and calls for backup
     think(
       ["Writing the career section", "Rewriting the career section", "Rethinking the career section", "Considering a career change"],
-      3600,
+      3000,
       { from: 251 }
     ),
     say("sage", "This is taking a while. I'm calling in help. Against my better judgment."),
@@ -211,7 +212,6 @@ function story(aud) {
     say("turbo", "it tested really well", 9),
     say("sage", "With who?"),
     say("turbo", "me", 9),
-    say("turbo", "ok one more small fix", 9),
     {
       t: "ask",
       id: "modesty",
@@ -230,62 +230,42 @@ function story(aud) {
       map: {
         yes: removeModesty,
         always: [...removeModesty, say("turbo", "and i never have to ask again 🙂", 9), say("sage", "Oh no.")],
-        no: [say("turbo", "fine. i'll just tell everyone he's humble", 9), say("sage", "That's… actually fine.")],
+        no: [say("turbo", "fine. i'll just tell everyone he's humble", 9)],
       },
     },
     tool("sage", "Edit", SECTION_FILES.skills, { result: "Removed Comic Sans. Some things are sacred.", ms: 900 }),
     site({ chaos: { comic: false }, hmr: SECTION_FILES.skills, focus: "skills" }),
 
-    // both grab Projects.jsx
-    say("sage", "I'll take Projects."),
-    say("turbo", "already on it", 9),
-    todo({ set: { Projects: "doing" } }),
-    {
-      t: "parallel",
-      tracks: [
-        [tool("sage", "Write", SECTION_FILES.projects, { ms: 1500, result: "Wrote 64 lines" })],
-        [tool("turbo", "Write", SECTION_FILES.projects, { ms: 300, result: "Wrote 6 lines (all emojis)" })],
-      ],
-    },
-    site({ sections: { projects: "built" }, chaos: { conflict: true }, focus: "projects", hmr: SECTION_FILES.projects }),
-    sys("CONFLICT: both agents wrote src/site/Projects.jsx", "err"),
-    say("turbo", "great minds", 9),
-    think("Resolving the merge conflict (picking mine)", 2000),
-    tool("sage", "Edit", SECTION_FILES.projects, { result: "Resolved. TURBO's emojis now live in a comment.", ms: 600 }),
-    site({ chaos: { conflict: false }, hmr: SECTION_FILES.projects }),
-    todo({ set: { Projects: "done" } }),
-
-    ...a.extra,
+    // sage writes Projects quietly while TURBO has an idea
+    { t: "parallel", tracks: [write("sage", "projects", { ms: 1200, lines: 64 }), a.extra] },
 
     // TURBO decides the team needs a PM; the PM's roadmap eats sage's memory
     say("turbo", "you know what this team needs? management", 9),
     say("sage", "No. Don't—"),
     ...summon("turbo", "pm", "npx summon-agent --role=product-manager", "added 1 agent (it already booked a meeting)"),
-    say("pm", "Hey team! 👋 Love the energy. Tiny ask: can we make the logo bigger?"),
+    say("pm", "Hey team! 👋 Tiny ask: can we make the logo bigger?"),
     site({ chaos: { logo: 1 }, focus: "hero", hmr: "src/site/Nav.jsx" }),
-    wait(900),
-    say("pm", "Bigger."),
+    wait(600),
     site({ chaos: { logo: 2 }, hmr: "src/site/Nav.jsx" }),
-    wait(1000),
+    wait(600),
     say("sage", "No."),
     site({ chaos: { logo: 0 }, hmr: "src/site/Nav.jsx" }),
-    say("pm", "Love the pushback. Let's take it offline — I'll put it on the roadmap."),
-    tool("pm", "Write", "ROADMAP.md", { result: "Wrote 4,812 lines · Q1: logo · Q2: bigger logo · Q3: AI", ms: 1100 }),
+    tool("pm", "Write", "ROADMAP.md", { result: "Wrote 4,812 lines · Q1: logo · Q2: bigger logo · Q3: AI", ms: 900 }),
     sys("pm-bot left the session · scheduled 3 follow-up meetings"),
     sys("context window full · compacting conversation…"),
-    think("Compacting conversation", 1800),
+    think("Compacting conversation", 1300),
     say("sage", HELLO, 14),
-    say("turbo", "we're 80% done", 9),
-    say("sage", "…Right. Of course. I was testing you."),
-
     {
       t: "parallel",
-      tracks: [write("sage", "hobbies", { ms: 1800 }), [wait(300), ...write("turbo", "contact", { ms: 400 })]],
+      tracks: [
+        [say("turbo", "we're 80% done", 9), say("sage", "…Right. Of course. I was testing you.")],
+        // TURBO finishes the last two while sage pretends it remembers
+        [wait(600), ...write("turbo", "hobbies", { ms: 400 }), ...write("turbo", "contact", { ms: 400 })],
+      ],
     },
 
     // the tests get "fixed"
-    say("sage", "Let me run the tests before we ship."),
-    tool("sage", "Bash", "npm test", { fail: true, result: "✗ 3 failing", ms: 1100 }),
+    tool("sage", "Bash", "npm test", { fail: true, result: "✗ 3 failing", ms: 1000 }),
     say("turbo", "i got this", 9),
     {
       t: "branch",
@@ -296,7 +276,6 @@ function story(aud) {
       },
     },
     tool("turbo", "Bash", "npm test", { result: "✓ 0 failing", ms: 300 }),
-    say("turbo", "all green", 9),
     say("sage", "There are no tests."),
     say("turbo", "and not one of them is failing", 9),
 
@@ -306,7 +285,6 @@ function story(aud) {
       turboOutro: a.turboOutro,
       stats: [
         ["agents", "3 (one of them a PM)"],
-        ["merge conflicts", "1"],
         ["meetings scheduled", "3"],
         ["tests", "0 (all passing)"],
         ["tokens used", "0 — it's all setTimeout"],
