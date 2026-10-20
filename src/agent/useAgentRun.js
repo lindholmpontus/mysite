@@ -58,7 +58,7 @@ export function useAgentRun() {
       setRunning(true);
 
       const handlers = {
-        async say({ who, text, pace = 16 }) {
+        async say({ who, text, pace = 20, hold }) {
           const id = push({ kind: "msg", who, text: "", full: text });
           if (speed.current === 0) return patch(id, { text });
           for (let i = 0; i <= text.length && alive(); i += 2) {
@@ -67,7 +67,8 @@ export function useAgentRun() {
             await sleep(pace);
           }
           patch(id, { text });
-          await sleep(220);
+          // give the reader time before the next line lands
+          await sleep(hold ?? Math.min(3800, 700 + text.length * 26));
         },
         async user({ text }) {
           const id = push({ kind: "user", text: "", typing: true });
@@ -103,7 +104,7 @@ export function useAgentRun() {
         },
         async join({ who, text }) {
           push({ kind: "join", who, text });
-          await sleep(500);
+          await sleep(1100);
         },
         async sys({ text, tone }) {
           push({ kind: "sys", text, tone });

@@ -53,7 +53,7 @@ function Browser({ site, scrollRef }) {
         <span className="url">localhost:5173</span>
         <span className="w-10" />
       </div>
-      <div ref={bodyRef} className="relative flex-1 min-h-0 overflow-hidden bg-[var(--paper)]">
+      <div ref={bodyRef} className="relative flex-1 min-h-0 overflow-hidden bg-[var(--space)]">
         <div
           ref={scrollRef}
           className="absolute left-0 top-0 overflow-y-auto overflow-x-hidden no-scrollbar"

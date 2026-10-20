@@ -5,8 +5,8 @@ export default {
     extend: {
       fontFamily: {
         mono: ['"JetBrains Mono"', "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
-        serif: ['"Instrument Serif"', "Georgia", "serif"],
-        sans: ['"Inter"', "system-ui", "sans-serif"],
+        display: ['"Syncopate"', "sans-serif"],
+        space: ['"Space Mono"', "ui-monospace", "monospace"],
       },
       colors: {
         shell: "var(--shell)",
