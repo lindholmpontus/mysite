@@ -54,11 +54,11 @@ const summon = (by, who, cmd, result) => [
 ];
 
 export const AUDIENCES = [
-  { value: "recruiter", label: "Recruiter", hint: "busy · has 7 seconds" },
-  { value: "developer", label: "Developer", hint: "will open devtools" },
-  { value: "family", label: "Family / friend", hint: "just wants to know he's ok" },
-  { value: "curious", label: "Just curious", hint: "mysterious" },
-  { value: "hurry", label: "I'm in a hurry", hint: "skip the small talk" },
+  { value: "recruiter", label: "Recruiter" },
+  { value: "developer", label: "Developer" },
+  { value: "family", label: "Family / friend" },
+  { value: "curious", label: "Just curious" },
+  { value: "hurry", label: "I'm in a hurry" },
 ];
 
 const A = {
@@ -73,7 +73,7 @@ const A = {
       say("sage", "He's a Data & AI Engineer. He does not need to be a ninja."),
       site({ chaos: { buzz: false }, hmr: SECTION_FILES.about }),
     ],
-    outro: "Done. Career's near the top, contact's at the bottom, zero ninjas. Your seven seconds start now.",
+    outro: "Done. Career right after About, contact at the end, zero ninjas. Your seven seconds start now.",
     turboOutro: "fastest portfolio in the west 🤠",
   },
   developer: {
@@ -86,7 +86,7 @@ const A = {
       tool("turbo", "Bash", "cargo new portfolio --force", { fail: true, result: "error: this is a JavaScript project, TURBO", ms: 600 }),
       say("sage", "We are not rewriting it in Rust."),
     ],
-    outro: "Done. Projects up top, every link is real. View source if you like — it's mostly setTimeout.",
+    outro: "Done. Every project link is real. View source if you like — it's mostly setTimeout.",
     turboOutro: "would've been faster in rust",
   },
   family: {
@@ -118,13 +118,9 @@ const A = {
   },
 };
 
-const SITE_ORDER = {
-  recruiter: ["hero", "about", "career", "skills", "projects", "hobbies", "contact"],
-  developer: ["hero", "about", "projects", "skills", "career", "hobbies", "contact"],
-  family: ["hero", "about", "hobbies", "career", "projects", "skills", "contact"],
-  curious: ["hero", "about", "career", "projects", "skills", "hobbies", "contact"],
-  hurry: ["hero", "about", "career", "projects", "skills", "hobbies", "contact"],
-};
+// one order for everyone: the planets' order in the solar system, so the
+// glimpse on the monitor matches the 3D journey it zooms into
+const ORDER = ["hero", "about", "career", "projects", "skills", "hobbies", "contact"];
 
 const ALL_BUILT = Object.fromEntries(Object.keys(SECTION_FILES).map((id) => [id, "built"]));
 
@@ -152,11 +148,11 @@ function finale(o) {
 function story(aud) {
   const a = A[aud];
   return [
-    site({ audience: aud, order: SITE_ORDER[aud] }),
+    site({ audience: aud, order: ORDER }),
     user(a.prompt),
     say("sage", a.open),
     tool("sage", "Read", "src/data/content.js", { result: "Read 112 lines", ms: 900 }),
-    todo({ items: SITE_ORDER[aud].map((id) => TODO_LABELS[id]) }),
+    todo({ items: ORDER.map((id) => TODO_LABELS[id]) }),
     site({ phase: "build" }),
     ...write("sage", "hero", { ms: 1700 }),
     think(a.verb, 2000),
@@ -262,7 +258,7 @@ function story(aud) {
 
 function hurry() {
   return [
-    site({ audience: "hurry", order: SITE_ORDER.hurry }),
+    site({ audience: "hurry", order: ORDER }),
     user("just show me the site. fast."),
     say("sage", "Fast isn't really my thing. Let me get someone who's… enthusiastic."),
     ...summon("sage", "turbo", "npx summon-agent --fastest", "Installed 1 agent (437 dependencies, 12 vulnerabilities)"),

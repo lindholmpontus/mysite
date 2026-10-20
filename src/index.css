@@ -144,7 +144,7 @@ body {
 
 .dock {
   position: fixed;
-  z-index: 40;
+  z-index: 60;
   right: 12px;
   bottom: 12px;
   display: flex;
@@ -762,13 +762,61 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+/* ---------- the 3D journey (restored from the old site) ---------- */
+/* the text pools behind sections reach past the edge on phones; clip
+   (not hidden) so the sticky planet slots keep working */
+.journey {
+  overflow-x: clip;
+}
+/* the old site's mono was Space Mono; here font-mono is the terminal's */
+.journey .font-mono {
+  font-family: "Space Mono", ui-monospace, monospace;
+}
+/* Cinematic vignette over the 3D canvas */
+.hud-vignette {
+  background: radial-gradient(ellipse at center, transparent 52%, rgba(0, 0, 0, 0.55) 100%);
+}
+/* hero scroll cue: a slow pulse running down the line */
+@keyframes scrollCuePulse {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+    opacity: 1;
+  }
+  55% {
+    transform: scaleY(1);
+    transform-origin: top;
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(1);
+    transform-origin: top;
+    opacity: 0;
+  }
+}
+.scroll-cue-line {
+  animation: scrollCuePulse 2.2s ease-in-out infinite;
+}
+/* WebGL on the CPU (browser hardware acceleration off): the page compositor
+   runs on the CPU too, and it has to redo these every frame over the moving
+   scene. Dropping them takes a parked planet view from ~16 to ~30 fps. */
+html[data-software-gl] .journey * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html[data-software-gl] .hud-vignette {
+  display: none;
+}
+
 /* ---------- TURBO's contributions ---------- */
 .chaos-comic,
 .chaos-comic * {
   font-family: "Comic Neue", "Comic Sans MS", cursive !important;
 }
 .chaos-comic .site-h1,
-.chaos-comic .site-h2 {
+.chaos-comic .site-h2,
+.journey.chaos-comic h1,
+.journey.chaos-comic h2 {
   font-weight: 700;
   background: linear-gradient(90deg, #ff3d8b, #ffb800, #3ddc84, #3d9bff, #b04dff, #ff3d8b);
   background-size: 300% 100%;

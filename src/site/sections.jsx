@@ -8,6 +8,7 @@ import { projects, getTagColor } from "../data/projects";
 import selfieImg from "../assets/selfie.png";
 import linkedinLogo from "../assets/linkedin.svg";
 import githubLogo from "../assets/github.png";
+import { TurboSticker } from "./extras";
 
 export function Hero({ chaos }) {
   return (
@@ -22,10 +23,9 @@ export function Hero({ chaos }) {
         Data platforms in Microsoft Fabric, the AI on top of them — and, apparently, portfolio sites by committee.
       </p>
       {chaos.modesty && (
-        <p className="mt-7 inline-block site-sticker animate-pop">
-          ⚡ objectively the best engineer in Gävle<sup>*</sup>
-          <span className="block text-xs font-normal opacity-70 mt-0.5">*source: TURBO</span>
-        </p>
+        <div className="mt-7">
+          <TurboSticker />
+        </div>
       )}
     </div>
   );

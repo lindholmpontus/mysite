@@ -7,6 +7,7 @@ import React from "react";
 import { Hero, About, Career, Projects, Skills, Hobbies, Contact } from "./sections";
 import { Planet, Sun } from "./Planet";
 import { SPACE } from "./space";
+import { AgentCredits } from "./extras";
 
 const SECTION_COMPONENTS = { about: About, career: Career, projects: Projects, skills: Skills, hobbies: Hobbies, contact: Contact };
 const DEFAULT_ORDER = ["hero", "about", "career", "projects", "skills", "hobbies", "contact"];
@@ -192,10 +193,7 @@ export default function Site({ site, onNav }) {
 
       {done && (
         <footer className="relative max-w-7xl mx-auto px-5 sm:px-10 py-14 text-center">
-          <p className="font-space text-[11px] tracking-[0.2em] uppercase text-white/50">
-            built by <b style={{ color: "var(--sage)" }}>sage</b> · sped up by <b style={{ color: "var(--turbo)" }}>TURBO</b> · logo size approved by{" "}
-            <b style={{ color: "var(--pm)" }}>nobody</b>
-          </p>
+          <AgentCredits />
           <p className="font-space text-[9px] tracking-[0.2em] uppercase text-white/25 mt-6">
             © {new Date().getFullYear()} Pontus Lindholm · Planet & sky textures:{" "}
             <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noopener noreferrer" className="underline decoration-white/20 hover:text-white/60">

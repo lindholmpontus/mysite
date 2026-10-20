@@ -18,7 +18,7 @@ function MenuBar() {
     <div className="menubar">
       <span className="flex gap-4 items-center">
         <b style={{ color: "var(--sage)" }}>✻</b>
-        <b>pontus-os</b>
+        <b>agentic-web-os</b>
         <span className="hidden sm:inline">File</span>
         <span className="hidden sm:inline">Edit</span>
         <span className="hidden sm:inline">Agents</span>
