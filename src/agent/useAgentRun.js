@@ -79,8 +79,8 @@ export function useAgentRun() {
           patch(id, { text, typing: false });
           await sleep(300);
         },
-        async think({ who = "sage", label, ms = 1600 }) {
-          const id = push({ kind: "think", who, label });
+        async think({ who = "sage", label, ms = 1600, from = 0 }) {
+          const id = push({ kind: "think", who, label, ms: ms * speed.current, from });
           await sleep(ms);
           remove(id);
         },

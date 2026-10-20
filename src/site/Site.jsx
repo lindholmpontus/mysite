@@ -136,7 +136,7 @@ export default function Site({ site, onNav }) {
 
   return (
     <div
-      className={`site min-h-full ${chaos.comic ? "chaos-comic" : ""}`}
+      className={`site min-h-full ${chaos.comic ? "chaos-comic" : ""} ${chaos.light ? "chaos-light" : ""}`}
       onClick={(e) => {
         const a = e.target.closest("a[data-nav]");
         if (a && onNav) {

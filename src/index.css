@@ -841,6 +841,30 @@ html[data-software-gl] .hud-vignette {
     transform: rotate(6deg) scale(1.06);
   }
 }
+/* TURBO's light mode: the page inverts and the room lights up like a flashbang */
+.chaos-light {
+  filter: invert(1) hue-rotate(180deg);
+}
+.room-light .room-glow {
+  background: radial-gradient(ellipse, rgba(255, 255, 255, 0.4), transparent 65%);
+}
+.room-light::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: #fff;
+  pointer-events: none;
+  animation: flashbang 1.2s ease-out forwards;
+}
+@keyframes flashbang {
+  from {
+    opacity: 0.85;
+  }
+  to {
+    opacity: 0;
+  }
+}
 .chaos-marquee {
   overflow: hidden;
   white-space: nowrap;

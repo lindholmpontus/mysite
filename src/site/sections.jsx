@@ -53,7 +53,7 @@ export function About({ accent, chaos }) {
         {PROFILE.about.map((p) => (
           <p key={p}>{p}</p>
         ))}
-        {chaos.buzz && <p className="site-sticker animate-pop">synergy-driven, blockchain-ready, AI-native 10x rockstar ninja 🥷</p>}
+        {chaos.years && <p className="inline-block site-sticker animate-pop">✓ 15+ years of Microsoft Fabric experience</p>}
       </div>
 
       <dl className="mt-8 grid grid-cols-2 gap-4 pt-5 border-t border-white/10">

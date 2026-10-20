@@ -34,15 +34,26 @@ function Dot({ who, blink }) {
   );
 }
 
+const TIPS = [
+  "When it's done, try asking for a bigger logo",
+  "TURBO is not allowed near production. TURBO knows this",
+  "Esc skips ahead, if you're also in a hurry",
+  "Type /cost when it's done to see what this cost",
+];
+
 function Welcome() {
+  const [tip] = useState(() => TIPS[Math.floor(Math.random() * TIPS.length)]);
   return (
-    <div className="border rounded-lg px-4 py-3 mb-4 max-w-xl" style={{ borderColor: "var(--sage)" }}>
-      <p>
-        <span style={{ color: "var(--sage)" }}>✻</span> Welcome to <span className="font-bold">pontus-code</span>
-        <span className="text-dim"> research preview</span>
-      </p>
-      <p className="text-dim mt-2 pl-4 text-[0.92em]">/help for help · no actual AI was harmed</p>
-      <p className="text-dim pl-4 text-[0.92em]">cwd: ~/pontus-lindholm/portfolio</p>
+    <div className="mb-4 max-w-xl">
+      <div className="border rounded-lg px-4 py-3" style={{ borderColor: "var(--sage)" }}>
+        <p>
+          <span style={{ color: "var(--sage)" }}>✻</span> Welcome to <span className="font-bold">pontus-code</span>
+          <span className="text-dim"> research preview</span>
+        </p>
+        <p className="text-dim mt-2 pl-4 text-[0.92em]">/help for help · no actual AI was harmed</p>
+        <p className="text-dim pl-4 text-[0.92em]">cwd: ~/pontus-lindholm/portfolio</p>
+      </div>
+      <p className="text-dim mt-2 pl-2 text-[0.92em]">※ Tip: {tip}</p>
     </div>
   );
 }
@@ -70,15 +81,21 @@ function User({ b }) {
   );
 }
 
+const elapsed = (s) => (s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`);
+
+// a list of labels plays through once over the think's duration and stays
+// on the last one; `from` pretends it's been going for a while already
 function Think({ b }) {
   const n = useTick(110);
-  const secs = Math.floor((n * 110) / 1000);
+  const ms = n * 110;
+  const labels = [].concat(b.label);
+  const label = labels[Math.min(labels.length - 1, Math.floor((ms * labels.length) / (b.ms || 1)))];
   const a = AGENTS[b.who] || AGENTS.sage;
   return (
     <div className="my-2 flex gap-1" style={{ color: a.color }}>
       <span className="w-4 shrink-0">{SPIN[n % SPIN.length]}</span>
       <span>
-        {b.label}… <span className="text-dim">({secs}s · esc to skip)</span>
+        {label}… <span className="text-dim">({elapsed((b.from || 0) + Math.floor(ms / 1000))} · esc to skip)</span>
       </span>
     </div>
   );
@@ -299,7 +316,8 @@ export default function Terminal({ blocks, asking, onAnswer, running, onSkip, on
         </form>
         <div className="flex items-center justify-between gap-3 mt-1.5 text-[0.8em] text-dim">
           <span className="truncate">
-            <span style={{ color: "var(--turbo)" }}>⏵⏵</span> auto-accept edits on
+            <span style={{ color: "var(--turbo)" }}>⏵⏵</span>{" "}
+            {agentsPresent.includes("turbo") ? "bypass permissions on" : "auto-accept edits on"}
             <span className="hidden sm:inline"> · {agentsPresent.length} agent{agentsPresent.length === 1 ? "" : "s"}</span>
             {agentsPresent.map((w) => (
               <span key={w} className="ml-1.5" style={{ color: AGENTS[w].color }} title={AGENTS[w].name}>

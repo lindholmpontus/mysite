@@ -69,7 +69,7 @@ function Browser({ site, scrollRef }) {
 export default function Room({ site, stage, screenRef, roomRef, browserScrollRef, terminal, toast, chaos }) {
   const showBrowser = stage !== "intro";
   return (
-    <div ref={roomRef} className={`room stage-${stage} ${chaos.comic ? "room-comic" : ""}`}>
+    <div ref={roomRef} className={`room stage-${stage} ${chaos.comic ? "room-comic" : ""} ${chaos.light ? "room-light" : ""}`}>
       <div className="room-glow" aria-hidden />
       <div className="monitor">
         <div className="bezel">
