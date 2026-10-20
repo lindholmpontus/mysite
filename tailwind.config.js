@@ -4,8 +4,20 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        display: ['"Syncopate"', "sans-serif"],
-        mono: ['"Space Mono"', "ui-monospace", "SFMono-Regular", "monospace"],
+        mono: ['"JetBrains Mono"', "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        serif: ['"Instrument Serif"', "Georgia", "serif"],
+        sans: ['"Inter"', "system-ui", "sans-serif"],
+      },
+      colors: {
+        shell: "var(--shell)",
+        ink: "var(--ink)",
+        dim: "var(--dim)",
+        "dim-strong": "var(--dim-strong)",
+        user: "var(--user-bg)",
+        line: "var(--line)",
+        err: "var(--err)",
+        ok: "var(--ok)",
+        "turbo-ink": "var(--turbo-ink)",
       },
     },
   },

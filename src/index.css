@@ -1,221 +1,442 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syncopate:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Comic+Neue:wght@400;700&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-html {
-  background: #000;
-  overscroll-behavior-y: none;
+:root {
+  /* terminal */
+  --shell: #0c0b0a;
+  --term: #171615;
+  --term-bar: #1f1e1c;
+  --ink: #ecebe7;
+  --dim: #8a877f;
+  --dim-strong: #c9c6be;
+  --user-bg: #23221f;
+  --line: #34322e;
+  --err: #ff6b6b;
+  --ok: #7ad48a;
+
+  /* the cast */
+  --sage: #d97757;
+  --turbo: #ff3d8b;
+  --turbo-ink: #ffd1e3;
+  --pm: #6cb6ff;
+
+  /* the site (paper) */
+  --paper: #f5f2ea;
+  --paper-2: #ebe6da;
+  --paper-ink: #1c1a17;
+  --paper-muted: #6b665c;
+  --paper-line: #dcd5c6;
+  --sage-ink: #b4532f;
+  --pm-ink: #2f73c0;
+}
+
+html,
+body {
+  background: var(--shell);
+  color: var(--ink);
+  overscroll-behavior: none;
 }
 
 ::selection {
-  background: rgba(91, 157, 255, 0.35);
-  color: #fff;
+  background: rgba(217, 119, 87, 0.4);
 }
 
-/* Cinematic vignette over the 3D canvas */
-.hud-vignette {
-  background: radial-gradient(ellipse at center, transparent 52%, rgba(0, 0, 0, 0.55) 100%);
+/* ---------- terminal ---------- */
+.term-window {
+  display: flex;
+  flex-direction: column;
+  background: var(--term);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+@media (min-width: 640px) {
+  .term-window {
+    border-radius: 12px;
+  }
+}
+.term-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.45rem 1rem;
+  background: var(--term-bar);
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.term-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
 }
 
-/* Whisper-subtle scanlines for the cockpit-glass feel */
-.hud-scanlines {
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.025) 0px,
-    rgba(255, 255, 255, 0.025) 1px,
-    transparent 1px,
-    transparent 4px
-  );
-  opacity: 0.5;
+.caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.05em;
+  margin-left: 1px;
+  vertical-align: -0.15em;
+  background: currentColor;
+  animation: blink 1s steps(1) infinite;
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+.animate-blink {
+  animation: blink 0.8s steps(1) infinite;
 }
 
-/* Modal Animations */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.diff-add {
+  background: rgba(70, 160, 90, 0.18);
+  color: #a8e6b4;
+}
+.diff-del {
+  background: rgba(220, 80, 80, 0.18);
+  color: #ffb3b3;
 }
 
-@keyframes scaleIn {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+@keyframes slam {
+  0% {
+    transform: scale(1.6) rotate(-2deg);
+    opacity: 0;
+    filter: blur(4px);
+  }
+  60% {
+    transform: scale(0.97) rotate(0.5deg);
+    opacity: 1;
+    filter: none;
+  }
+  100% {
+    transform: none;
+  }
+}
+.animate-slam {
+  animation: slam 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
 }
 
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease-out forwards;
+/* ---------- browser preview ---------- */
+.browser {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  overflow: hidden;
 }
-
-.animate-scaleIn {
-  animation: scaleIn 0.3s ease-out forwards;
+@media (min-width: 1024px) {
+  .browser {
+    border-radius: 12px;
+  }
 }
-
-/* Hologram readout — fine scanlines + a slow flicker on the glow layer only
-   (kept off the text so content stays crisp/readable) */
-.holo-lines {
-  background-image: repeating-linear-gradient(
-    0deg,
-    rgba(170, 210, 255, 0.06) 0px,
-    rgba(170, 210, 255, 0.06) 1px,
-    transparent 1px,
-    transparent 3px
-  );
+.browser-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--term-bar);
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
 }
-@keyframes holoFlicker {
-  0%, 100% { opacity: 1; }
-  47% { opacity: 1; }
-  48% { opacity: 0.78; }
-  49% { opacity: 1; }
-  84% { opacity: 1; }
-  85% { opacity: 0.88; }
-  86% { opacity: 1; }
+.browser-bar .dot {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
 }
-.holo-flicker {
-  animation: holoFlicker 5s linear infinite;
+.browser-bar .url {
+  flex: 1;
+  max-width: 340px;
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--dim-strong);
+  background: var(--term);
+  border-radius: 6px;
+  padding: 2px 10px;
 }
-
-/* WebGL on the CPU (browser hardware acceleration off): the page compositor
-   runs on the CPU too, and it has to redo these every frame over the moving
-   scene. Dropping them takes a parked planet view from ~16 to ~30 fps. */
-html[data-software-gl] * {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-html[data-software-gl] .hud-scanlines,
-html[data-software-gl] .hud-vignette,
-html[data-software-gl] .holo-lines {
-  display: none;
-}
-html[data-software-gl] .holo-flicker {
-  animation: none;
-}
-
-/* "signal intercepted" entrance glitch — corrupts then stabilises. */
-@keyframes heroGlitch {
-  0% { opacity: 0; transform: translateX(-7px) skewX(6deg); text-shadow: 5px 0 #ff2d6e, -5px 0 #36e0ff; }
-  12% { opacity: 1; transform: translateX(5px) skewX(-4deg); text-shadow: -4px 0 #ff2d6e, 4px 0 #36e0ff; }
-  24% { transform: translateX(-3px); text-shadow: 3px 0 #ff2d6e, -3px 0 #36e0ff; }
-  38% { transform: translateX(2px) skewX(2deg); text-shadow: -2px 0 #ff2d6e, 2px 0 #36e0ff; }
-  52% { transform: translateX(0); }
-  60%, 100% { transform: translateX(0) skewX(0); text-shadow: 0 0 40px rgba(220, 232, 245, 0.5); }
-}
-/* ongoing PERMANENT glitch — stable most of the cycle, a brief RGB-split jitter
-   burst near the end, repeating forever (an unstable, corrupted signal). */
-@keyframes glitchLoop {
-  0%, 68%, 100% { transform: translate(0, 0) skewX(0); text-shadow: 0 0 40px rgba(220, 232, 245, 0.5); }
-  70% { transform: translate(-4px, 1px) skewX(-3deg); text-shadow: 5px 0 #ff2d6e, -5px 0 #36e0ff; }
-  73% { transform: translate(4px, -1px) skewX(3deg); text-shadow: -5px 0 #ff2d6e, 5px 0 #36e0ff; }
-  76% { transform: translate(-3px, 0); text-shadow: 4px 0 #ff2d6e, -4px 0 #36e0ff; }
-  79% { transform: translate(3px, 1px) skewX(-2deg); text-shadow: -4px 0 #ff2d6e, 4px 0 #36e0ff; }
-  82% { transform: translate(-2px, -1px); text-shadow: 3px 0 #ff2d6e, -3px 0 #36e0ff; }
-  85% { transform: translate(2px, 1px); text-shadow: -3px 0 #ff2d6e, 3px 0 #36e0ff; }
-  88% { transform: translate(-1px, 0); text-shadow: 2px 0 #ff2d6e, -2px 0 #36e0ff; }
-  91% { transform: translate(0, 0); text-shadow: 0 0 40px rgba(220, 232, 245, 0.5); }
-}
-/* entrance glitch once, then a recurring glitch burst (~every 2s) forever */
-.help-glitch { animation: heroGlitch 1.1s ease-out both, glitchLoop 2s 1.2s infinite; }
-
-/* one-shot "signal breaking in" flash overlay */
-@keyframes bootFlash {
-  0% { opacity: 0; }
-  6% { opacity: 0.55; }
-  12% { opacity: 0.1; }
-  20% { opacity: 0.4; }
-  100% { opacity: 0; }
-}
-.boot-flash {
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(150, 200, 255, 0.14) 0px,
-    rgba(150, 200, 255, 0.14) 2px,
-    transparent 2px,
-    transparent 5px
-  );
-  animation: bootFlash 0.9s ease-out forwards;
-}
-
-/* Boot-screen deep-space void — a faint, slowly-drifting nebula haze behind the
-   console. Kept very dark so the overall feel is black space, not a lit room. */
-.boot-nebula {
+.hmr {
   position: absolute;
-  inset: -20%;
-  background:
-    radial-gradient(circle at 28% 32%, rgba(46,78,140,0.20), transparent 42%),
-    radial-gradient(circle at 74% 58%, rgba(78,46,128,0.16), transparent 44%),
-    radial-gradient(circle at 52% 84%, rgba(24,86,98,0.13), transparent 46%);
-  filter: blur(24px);
-  animation: nebulaDrift 46s ease-in-out infinite alternate;
-}
-@keyframes nebulaDrift {
-  from { transform: translate3d(-2%, -1%, 0) scale(1.05); }
-  to { transform: translate3d(2%, 2%, 0) scale(1.14); }
-}
-
-/* CRT terminal — dense dark scanlines + a faint phosphor flicker */
-.crt-scan {
-  background-image: repeating-linear-gradient(
-    0deg,
-    rgba(0, 0, 0, 0) 0px,
-    rgba(0, 0, 0, 0) 2px,
-    rgba(0, 0, 0, 0.32) 2px,
-    rgba(0, 0, 0, 0.32) 3px
-  );
-}
-@keyframes crtFlicker {
-  0%, 100% { opacity: 0.97; }
-  48% { opacity: 1; }
-  50% { opacity: 0.9; }
-  52% { opacity: 1; }
-}
-.crt-flicker { animation: crtFlicker 4s linear infinite; }
-@keyframes crtBlink {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0; }
-}
-.crt-cursor { animation: crtBlink 0.8s step-end infinite; }
-
-/* Boot-terminal CTA (begin recovery) — base + an unmissable hover: the whole
-   button brightens, lifts and glows, not just the ▶ nudge */
-.boot-cta {
-  border: 1px solid #c9d6e4;
-  color: #c9d6e4;
-  background: rgba(200, 215, 232, 0.08);
-  box-shadow: 0 0 20px rgba(200, 215, 232, 0.28);
-}
-.boot-cta:hover {
-  border-color: #ffffff;
-  color: #ffffff;
-  background: rgba(200, 215, 232, 0.24);
-  box-shadow: 0 0 38px rgba(200, 215, 232, 0.6), inset 0 0 14px rgba(200, 215, 232, 0.18);
-  transform: translateY(-1px);
-  text-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
-}
-.boot-cta:active {
-  transform: translateY(0) scale(0.98);
+  right: 12px;
+  bottom: 12px;
+  z-index: 20;
+  font-size: 11.5px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(23, 22, 21, 0.92);
+  border: 1px solid var(--line);
+  color: var(--dim-strong);
+  pointer-events: none;
 }
 
-/* Slim space-themed scrollbar for panels */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+.dock {
+  position: fixed;
+  z-index: 40;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 999px;
+  background: var(--term);
+  border: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  transition: transform 0.15s;
 }
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 3px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(100, 108, 255, 0.35);
-  border-radius: 3px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 108, 255, 0.6);
+.dock:hover {
+  transform: translateY(-2px);
 }
 
-/* hero scroll cue: a slow pulse running down the line */
-@keyframes scrollCuePulse {
-  0% { transform: scaleY(0); transform-origin: top; opacity: 1; }
-  55% { transform: scaleY(1); transform-origin: top; opacity: 1; }
-  100% { transform: scaleY(1); transform-origin: top; opacity: 0; }
+/* ---------- the site ---------- */
+.site {
+  background: var(--paper);
+  color: var(--paper-ink);
+  font-family: "Inter", system-ui, sans-serif;
+  scroll-behavior: smooth;
 }
-.scroll-cue-line {
-  animation: scrollCuePulse 2.2s ease-in-out infinite;
+.site-scroll {
+  background: var(--paper);
+}
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--paper-line);
+}
+.site-logo {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--paper-ink);
+  color: var(--paper);
+  font-family: "Instrument Serif", serif;
+  font-size: 18px;
+  font-style: italic;
+  transform-origin: left top;
+  transition: transform 0.6s cubic-bezier(0.3, 1.4, 0.5, 1);
+  position: relative;
+}
+.site-kicker {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper-muted);
+}
+.site-h1 {
+  font-family: "Instrument Serif", serif;
+  font-weight: 400;
+  font-size: clamp(3.5rem, 11vw, 8.5rem);
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+}
+.site-h1 em {
+  color: var(--sage-ink);
+}
+.site-h2 {
+  font-family: "Instrument Serif", serif;
+  font-weight: 400;
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  line-height: 1.05;
+  margin-top: 0.35rem;
+}
+.site-muted {
+  color: var(--paper-muted);
+}
+.site-border {
+  border-color: var(--paper-line);
+}
+.site-dot {
+  background: var(--sage-ink);
+  box-shadow: 0 0 0 4px var(--paper);
+}
+.site-ring {
+  box-shadow: 0 0 0 4px var(--paper), 0 0 0 5px var(--paper-line);
+}
+.site-card {
+  display: block;
+  padding: 1.25rem;
+  border-radius: 14px;
+  background: #fbf9f4;
+  border: 1px solid var(--paper-line);
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+a.site-card:hover {
+  border-color: var(--sage-ink);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(60, 40, 20, 0.08);
+}
+.site-tag {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--paper-2);
+  color: var(--paper-muted);
+}
+.site-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--paper-line);
+  background: #fbf9f4;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.site-btn:hover {
+  border-color: var(--paper-ink);
+}
+.site-sticker {
+  font-family: "Comic Neue", "Comic Sans MS", cursive;
+  font-weight: 700;
+  padding: 0.5rem 0.9rem;
+  border-radius: 6px;
+  background: #ffe14d;
+  color: #1c1a17;
+  transform: rotate(-2deg);
+  box-shadow: 3px 3px 0 var(--turbo);
+}
+.site-conflict {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  background: #fff1f1;
+  border: 2px dashed var(--err);
+  color: #a33;
+  white-space: pre-wrap;
+  animation: shake 0.4s 2;
+}
+@keyframes shake {
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.skel {
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--paper-2) 0%, #f9f6ef 50%, var(--paper-2) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.1s linear infinite;
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+.animate-rise {
+  animation: rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes pop {
+  0% {
+    transform: scale(0.4) rotate(-8deg);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.08) rotate(-1deg);
+  }
+}
+.animate-pop {
+  animation: pop 0.4s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+
+.cookie {
+  position: sticky;
+  bottom: 16px;
+  margin: 0 auto 16px;
+  width: min(420px, calc(100% - 32px));
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid var(--paper-line);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  z-index: 20;
+}
+
+/* ---------- TURBO's contributions ---------- */
+.chaos-comic,
+.chaos-comic * {
+  font-family: "Comic Neue", "Comic Sans MS", cursive !important;
+}
+.chaos-comic .site-h1,
+.chaos-comic .site-h2 {
+  font-weight: 700;
+  background: linear-gradient(90deg, #ff3d8b, #ffb800, #3ddc84, #3d9bff, #b04dff, #ff3d8b);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: rainbow 2.5s linear infinite;
+}
+.chaos-comic .site-h1 em {
+  color: transparent;
+}
+.chaos-comic .skill {
+  animation: wobble 0.9s ease-in-out infinite;
+}
+.chaos-comic .skill:nth-child(even) {
+  animation-direction: reverse;
+}
+@keyframes rainbow {
+  to {
+    background-position: 300% 0;
+  }
+}
+@keyframes wobble {
+  50% {
+    transform: rotate(6deg) scale(1.06);
+  }
+}
+.chaos-marquee {
+  overflow: hidden;
+  white-space: nowrap;
+  background: var(--turbo);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 4px 0;
+}
+.chaos-marquee span {
+  display: inline-block;
+  padding-left: 100%;
+  animation: marquee 9s linear infinite;
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
